@@ -1,0 +1,21 @@
+{
+  "name": "Valayosai",
+  "version": "0.1.5",
+  "manifest_version": 2,
+  "description": "Listen to any Tamil song the moment you think about it.",
+  "background": {
+    "scripts": ["jquery-1.9.1.min.js","background.js"]
+  },
+  "browser_action": {
+	 "default_popup": "popup.html",
+   "default_icon": "logo/icon256.png"
+  },
+  "icons": {
+    "16": "logo/icon16.png",
+    "48": "logo/icon48.png",
+    "128": "logo/icon128.png"
+   },
+  
+ "permissions": [ "tabs", "http://*/*", "https://*/*" ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com; object-src 'self'"
+}
