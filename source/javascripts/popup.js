@@ -76,43 +76,43 @@ playpause.click(function(e){
 	e.preventDefault();
 });
 
-search.keyup(function(){
-	delay(function(){
-		var searchVal = search.val();
-		results.html("");
-		resultsContainer.removeClass("loading");
-		showSearchResult();
-		if(searchVal.length > 1)
-		{
-			resultsContainer.addClass("loading");
-			_gaq.push(['_trackEvent', 'search', 'searched', searchVal]);
-			var searchURL = songScrapper + "/search?q="+ encodeURIComponent(searchVal);
-			$.getJSON(searchURL, null, function(data){
-				results.html("");
-				resultsContainer.removeClass("loading");
-				if(data.length == 0)
-					results.append("<li><span class='no_results'>No results found</span></li>")
+// search.keyup(function(){
+// 	delay(function(){
+// 		var searchVal = search.val();
+// 		results.html("");
+// 		resultsContainer.removeClass("loading");
+// 		showSearchResult();
+// 		if(searchVal.length > 1)
+// 		{
+// 			resultsContainer.addClass("loading");
+// 			_gaq.push(['_trackEvent', 'search', 'searched', searchVal]);
+// 			var searchURL = songScrapper + "/search?q="+ encodeURIComponent(searchVal);
+// 			$.getJSON(searchURL, null, function(data){
+// 				results.html("");
+// 				resultsContainer.removeClass("loading");
+// 				if(data.length == 0)
+// 					results.append("<li><span class='no_results'>No results found</span></li>")
 
-				$.each(data, function(index, result){
-					var addView = "";
-					if(result._type == "song")
-					{
-						addView = "<a href class='addsong' data-movie='"+result.movie_name+"' data-song='"+result.name+"' data-url='"+ result.url  +"' title='Add Song' data-vid='"+ result._id+"'><i class='icon-plus-sign'></i></a>";
-						results.append("<li><span>"+ result.name + " - " + result.movie_name + '</span>'+  addView + "</li>");
-					}
-					else
-					{
-						addView = "<a href class='addall' data-by='"+result._id+"' data-name='"+result.name+"' data-type='"+ result._type + "' title='Add all songs in album'><i class='icon-plus-sign'></i></a>"
-						 			+ "<a href class='viewentries' data-by='"+result._id+"' data-name='"+result.name+"' data-type='"+ result._type + "' title='View album'><i class='icon-list'></i></a>";
-						results.append("<li><span>"+ result.name +" - "+ result._type +" </span>" + addView + "</li>");
-					}
-				});
+// 				$.each(data, function(index, result){
+// 					var addView = "";
+// 					if(result._type == "song")
+// 					{
+// 						addView = "<a href class='addsong' data-movie='"+result.movie_name+"' data-song='"+result.name+"' data-url='"+ result.url  +"' title='Add Song' data-vid='"+ result._id+"'><i class='icon-plus-sign'></i></a>";
+// 						results.append("<li><span>"+ result.name + " - " + result.movie_name + '</span>'+  addView + "</li>");
+// 					}
+// 					else
+// 					{
+// 						addView = "<a href class='addall' data-by='"+result._id+"' data-name='"+result.name+"' data-type='"+ result._type + "' title='Add all songs in album'><i class='icon-plus-sign'></i></a>"
+// 						 			+ "<a href class='viewentries' data-by='"+result._id+"' data-name='"+result.name+"' data-type='"+ result._type + "' title='View album'><i class='icon-list'></i></a>";
+// 						results.append("<li><span>"+ result.name +" - "+ result._type +" </span>" + addView + "</li>");
+// 					}
+// 				});
 
 				
-			});
-		}
-	}, 250);
-});
+// 			});
+// 		}
+// 	}, 250);
+// });
 
 progress.click(function(e){
 	var posX = $(this).offset().left, posY = $(this).offset().top;
