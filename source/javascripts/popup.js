@@ -249,37 +249,37 @@ function addSongsFromAlbum(songs)
 
 function showSearchResult()
 {
-	results.show();
-	album.hide();
-	albumList.html("")
+	// results.show();
+	// album.hide();
+	// albumList.html("")
 }
 
 function showNowPlaying(){
-	$("#search_panel").hide();
+	// $("#search_panel").hide();
 }
 
 function bindPlay(){
-	results.on('click',".addsong", function(e){
-		var target = $(e.currentTarget);
-		var movie = target.data("movie");
-		var song = target.data("song");
-		var url = target.data("url");
-		var vId = target.data("vid");
-		var newID = addToLocalstorage({movie: movie, song: song, constructedUrl: url, vId: vId});
-		addToNowPlaying({movie: movie, song: song, id: newID});
-		displayPurr();
-		e.preventDefault();
-	});
+	// results.on('click',".addsong", function(e){
+	// 	var target = $(e.currentTarget);
+	// 	var movie = target.data("movie");
+	// 	var song = target.data("song");
+	// 	var url = target.data("url");
+	// 	var vId = target.data("vid");
+	// 	var newID = addToLocalstorage({movie: movie, song: song, constructedUrl: url, vId: vId});
+	// 	addToNowPlaying({movie: movie, song: song, id: newID});
+	// 	displayPurr();
+	// 	e.preventDefault();
+	// });
 
 	results.on('click',".viewentries", function(e){
-		var target = $(e.currentTarget);
-		var movieID = target.data("by");
-		var name = target.data("name");
-		var type = target.data("type");
-		fetchAndAddAllToAlbumSongs(movieID,name, type);
-		results.hide();
-		album.show();
-		e.preventDefault();
+		// var target = $(e.currentTarget);
+		// var movieID = target.data("by");
+		// var name = target.data("name");
+		// var type = target.data("type");
+		// fetchAndAddAllToAlbumSongs(movieID,name, type);
+		// results.hide();
+		// album.show();
+		// e.preventDefault();
 	});
 
 	results.on('click', '.addall', function(e){
@@ -334,15 +334,15 @@ function fetchAndAddAllToAlbumSongs(movieID, movieName, type){
 }
 
 function fetchAndAddAllToNowPlayingSongs(movieID, type){
-	$.get(songScrapper + "/"+type+"s/"+movieID, function(data){
-		$.each(data, function(key, value){
-			movie = value.movie_name;
-			song = value.name;
-			vId = value._id
-			var newID = addToLocalstorage({movie: movie, song: song, constructedUrl: value.url, vId: vId});
-			addToNowPlaying({movie: movie, song: song, id: newID});
-		});
-	});
+	// $.get(songScrapper + "/"+type+"s/"+movieID, function(data){
+	// 	$.each(data, function(key, value){
+	// 		movie = value.movie_name;
+	// 		song = value.name;
+	// 		vId = value._id
+	// 		var newID = addToLocalstorage({movie: movie, song: song, constructedUrl: value.url, vId: vId});
+	// 		addToNowPlaying({movie: movie, song: song, id: newID});
+	// 	});
+	// });
 }
 
 function addToLocalstorage(songJson)
