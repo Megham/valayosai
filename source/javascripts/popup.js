@@ -149,19 +149,19 @@ next.click(function(e){
 });
 
 np_add_all.click(function(e){
-	var songList = $("#album ul input[type='checkbox']");
-	addSongsFromAlbum(songList);
-	var target = $(e.currentTarget);
-	displayPurr();
-	e.preventDefault();	
+	// var songList = $("#album ul input[type='checkbox']");
+	// addSongsFromAlbum(songList);
+	// var target = $(e.currentTarget);
+	// displayPurr();
+	// e.preventDefault();	
 });
 
 np_add_songs.click(function(e){
-	var songList = $("#album ul input[type='checkbox']:checked");
-	addSongsFromAlbum(songList);
-	var target = $(e.currentTarget);
-	displayPurr();
-	e.preventDefault();	
+	// var songList = $("#album ul input[type='checkbox']:checked");
+	// addSongsFromAlbum(songList);
+	// var target = $(e.currentTarget);
+	// displayPurr();
+	// e.preventDefault();	
 });
 
 thanksLinks.click(function(e){
@@ -298,14 +298,14 @@ function bindPlay(){
 	});
 
 	nowPlaying.on("click", ".remove_song", function(e){
-		var indexToRemove = $(e.currentTarget).data("id");
-		$("a[data-id='"+indexToRemove+"']", nowPlaying).parent("li").remove();
-		chrome.extension.sendMessage({message: {action: "removeIfPlaying", id: indexToRemove}}, function(res){
-			removeFromLocalStorage(indexToRemove);
-		});
+		// var indexToRemove = $(e.currentTarget).data("id");
+		// $("a[data-id='"+indexToRemove+"']", nowPlaying).parent("li").remove();
+		// chrome.extension.sendMessage({message: {action: "removeIfPlaying", id: indexToRemove}}, function(res){
+		// 	removeFromLocalStorage(indexToRemove);
+		// });
 
-		e.stopPropagation();
-		e.preventDefault();
+		// e.stopPropagation();
+		// e.preventDefault();
 	});
 
 	clear_all.click(function(e){

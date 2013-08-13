@@ -38,7 +38,7 @@
 				<li><a href="#nowplaying" class="links">Search</a></li>
 			</ul>
 		</div>
-		<div id="search_panel" class="panel" ng-controller="SearchResultCtrl">
+		<div id="search_panel" class="panel" ng-controller="SearchResultCtrl" ng-show="showSearch">
 			<div class="search_text_wrapper"><input type="text" id="search" search class="search-query input-large" placeholder="Type Movie/Song name... "/></div>
 			<div id="results" ng-show="showResults">
 				<ul>
@@ -57,14 +57,14 @@
 				<div>
 					<div>
 						<h5 id="album_name">{{album.name}}</h5> 
-						<a href="" id="np_add_songs">Add marked</a> |
-						<a href="" id="np_add_all">Add All</a>
+						<a href="" ng-click="addMarkedAlbumSongs()" id="np_add_songs">Add marked</a> |
+						<a href="" id="np_add_all" ng-click="addAllAlbumSongs()">Add All</a>
 					</div>
 					<div class="album_song_list_wrapper">
 						<ul>
 							<li ng-repeat="song in album.songs">
 								<label>
-									<input type='checkbox'/>{{song.name}}
+									<input type='checkbox' ng-model="song.checked"/>{{song.name}}
 								</label>
 							</li>
 						</ul>	
@@ -72,7 +72,7 @@
 				</div>
 			</div>
 		</div>
-		<div id="nowplaying" class="panel" ng-controller="NowPlayingCtrl">
+		<div id="nowplaying" class="panel" ng-controller="NowPlayingCtrl" ng-show="!showSearch">
 			<div id="np_container">
 
 				<div class="navigators">
@@ -84,7 +84,7 @@
 						<span>
 							<a class='playsong' href>{{song.name}} - {{song.movie}}</a>
 						</span>
-						<a class='remove_song' href='' data-id="{{song.id}}"><i class='icon-remove-sign'></i></a>
+						<a class='remove_song' href='' ng-click="removeSong(song)" data-id="{{song.id}}"><i class='icon-remove-sign'></i></a>
 					</li>
 				</ul>
 			</div>

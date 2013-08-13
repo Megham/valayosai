@@ -53,9 +53,9 @@ valayosai.directive 'search', ($http, $q, Result) ->
 
 
 SearchResultCtrl = ($scope, $rootScope, $http, Result, addToNowPlaying) ->
+	$scope.showSearch = false
 	$scope.showResults = true
 	$scope.album = {name: "", songs: []}
-
 
 	$scope.addSong = (id) ->
 		result = $.grep $scope.results, (obj) ->
@@ -76,16 +76,27 @@ SearchResultCtrl = ($scope, $rootScope, $http, Result, addToNowPlaying) ->
 			.success (data, status, headers, config) ->
 				songs = []
 				$.each data, (key, value) ->
-					songs.push {name: value.name, id: value._id, url: value.url}
+					songs.push {name: value.name, id: value._id, url: value.url, checked: false}
 				$scope.album = {name: result.name, songs: songs}
+
+	$scope.addAllAlbumSongs = () ->
+		$.each $scope.album.songs, (index, value) ->
+			addToNowPlaying($.extend(value, {movie: $scope.album.name}), $rootScope)
+
+	$scope.addMarkedAlbumSongs = () ->
+		checkedSongs = $.grep $scope.album.songs, (obj) ->
+			obj.checked == true
+		$.each checkedSongs, (index, value) ->
+			addToNowPlaying($.extend(value, {movie: $scope.album.name}), $rootScope)
 
 	$scope.displayResults = () ->
 		$scope.showResults = true
 
 NowPlayingCtrl = ($rootScope, $scope) ->
 	$rootScope.npSongs = []
-	$scope.addTo = (song) ->
-		$rootScope.npSongs.push song
+	$scope.removeSong = (song) ->
+		$rootScope.npSongs = $.grep $rootScope.npSongs, (obj)->
+							obj != song
 
 window.SearchResultCtrl = SearchResultCtrl
 window.NowPlayingCtrl = NowPlayingCtrl
