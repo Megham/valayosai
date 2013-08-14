@@ -1,5 +1,6 @@
 songScrapper = "http://song-scrapper.herokuapp.com";
 valayosai = angular.module('valayosai', [])
+playerLength = 250
 
 delay = (() ->
 	timer = 0
@@ -19,6 +20,29 @@ valayosai.factory 'Result', () ->
 				if this.movie? then "#{this.name} - #{this.movie}" else this.name
 		})
 	Result
+
+valayosai.factory 'LocalStorage', () ->
+	LocalStorage = {
+		add: (songJson) ->
+			existingPlaylist = this.all()
+			existingPlaylist.push songJson
+			localStorage["playlist"] = JSON.stringify existingPlaylist
+
+		,all: () ->
+			playlist = localStorage["playlist"]
+			playlist = if (playlist? and playlist !=  "") then JSON.parse(playlist) else []
+
+		,destroy: (id) ->
+			existingPlaylist = this.all()
+			existingPlaylist = $.grep existingPlaylist, (obj) ->
+								obj.id != id
+			localStorage["playlist"] = JSON.stringify existingPlaylist
+
+		,destroyAll: () ->
+			localStorage["playlist"] = "[]"
+	}
+	LocalStorage
+
 valayosai.factory 'purr', ($rootScope) ->
 	(message) ->
 		message = "Added" unless message?
@@ -27,7 +51,7 @@ valayosai.factory 'purr', ($rootScope) ->
 		purrContainer.fadeIn(200).delay(800).fadeOut(200)
 
 
-valayosai.factory 'addToNowPlaying', ($rootScope, purr) ->
+valayosai.factory 'addToNowPlaying', ($rootScope, purr, LocalStorage) ->
 	# playImmediately = typeof playImmediately !== 'undefined' ? playImmediately : true;
 	# var dataID = songJson.id != undefined ? "data-id='" + songJson.id+"'" : '';
 	# nowPlaying.append("<li><span><a class='playsong' data-song='"+songJson.song+"' "+ dataID+ " data-movie='"+songJson.movie+"' href >"+ songJson.song +"-" + songJson.movie +"</a></span><a class='remove_song' href='' "+dataID+"><i class='icon-remove-sign'></i></a></li>");
@@ -37,8 +61,8 @@ valayosai.factory 'addToNowPlaying', ($rootScope, purr) ->
 	# }
 	(songJson, doPurr) ->
 		$rootScope.npSongs.push {name: songJson.name, movie: songJson.movie, id: songJson.id}
-		if doPurr
-			purr()
+		LocalStorage.add {name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url }
+		purr() if doPurr
 		# sendMessage({action: "playSongIfNotPlaying", id: songJson.id})
 
 valayosai.directive 'search', ($http, $q, Result) ->
@@ -103,15 +127,19 @@ SearchResultCtrl = ($scope, $rootScope, $http, Result, addToNowPlaying, purr) ->
 			addToNowPlaying($.extend(value, {movie: $scope.album.name}))
 		purr()
 
-NowPlayingCtrl = ($rootScope, $scope) ->
-	$rootScope.npSongs = []
-	
+NowPlayingCtrl = ($rootScope, $scope, LocalStorage) ->	
 	$scope.removeSong = (song) ->
 		$rootScope.npSongs = $.grep $rootScope.npSongs, (obj)->
 							obj != song
+		LocalStorage.destroy(song.id)
 
 	$scope.createPlaylist = () ->
 		$rootScope.createPlaylistPopup = if $rootScope.npSongs.length < 15 then "#need_more" else "#create_playlist"
+
+	$scope.destroyAll = () ->
+		$rootScope.npSongs = []
+		LocalStorage.destroyAll()
+
 
 CreatePlaylistCtrl = ($rootScope, $scope, $http) ->
 	$scope.playlistName = ""
@@ -122,56 +150,50 @@ CreatePlaylistCtrl = ($rootScope, $scope, $http) ->
 							$("#create_playlist").modal("hide")
 
 
+VPlayerCtrl = ($scope, $rootScope, LocalStorage) ->
+	chrome.extension.sendMessage {message: {action: "init"}}, (response) ->
+		console.log(response)
+		$scope.$apply () ->
+			$scope.playingWidth = {width: "#{response.playPercent * playerLength}px"}
+			$scope.bufferingWidth = {width: "#{response.bufferPercent * playerLength}px"}
+
+			$scope.currentTime = response.currentTime
+			$scope.duration = response.duration
+			$scope.volume = response.volume
+			$scope.songName = response.songName
+			$scope.playing =  !response.paused
+			$scope.playPause = if response.paused then "icon-play icon-large" else "icon-pause icon-large"
+	$rootScope.npSongs = LocalStorage.all()
+
+	$scope.play = ()->
+
+
+
+
+
+
+
+
+	# 	playing.width(response.playPercent * playerLength);
+	# 	currentTime.html(response.currentTime);
+	# 	duration.html(response.duration);
+	# 	buffering.width(response.bufferPercent* playerLength);
+	# 	setVolumeState(response.volume);
+	# 	songName.html(response.songName);
+	# 	$(".playsong[data-id='"+ response.currentSongIndex+"'] ").addClass("current");
+	# 	if(!response.paused)
+	# 		setPlayPause("pause");
+	# 	else
+	# 		setPlayPause("play");
+
+	# $.each(getSongs(), function(index, entry){
+	# 	addToNowPlaying({movie: entry.movie, song: entry.song, id: entry.id }, false);
+	# });
 
 	
-
 window.SearchResultCtrl = SearchResultCtrl
 window.NowPlayingCtrl = NowPlayingCtrl
 window.CreatePlaylistCtrl = CreatePlaylistCtrl
+window.VPlayerCtrl = VPlayerCtrl
 
 
-
-
-
-					# scope.$apply(function() {
-					# 	ctrl.$setViewValue(elm.html());
-					# 	});
-					# });
-
-# // model -> view
-# ctrl.$render = function(value) {
-# 	elm.html(value);
-# 	};
-
-# 	// load init value from DOM
-# 	ctrl.$setViewValue(elm.html());
-# }
-# };
-
-
-# function TodoCtrl($scope) {
-#   $scope.todos = [
-#     {text:'learn angular', done:true},
-#     {text:'build an angular app', done:false}];
-
-#   $scope.addTodo = function() {
-#     $scope.todos.push({text:$scope.todoText, done:false});
-#     $scope.todoText = '';
-#   };
-
-#   $scope.remaining = function() {
-#     var count = 0;
-#     angular.forEach($scope.todos, function(todo) {
-#       count += todo.done ? 0 : 1;
-#     });
-#     return count;
-#   };
-
-#   $scope.archive = function() {
-#     var oldTodos = $scope.todos;
-#     $scope.todos = [];
-#     angular.forEach(oldTodos, function(todo) {
-#       if (!todo.done) $scope.todos.push(todo);
-#     });
-#   };
-# }

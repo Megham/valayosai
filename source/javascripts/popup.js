@@ -134,8 +134,8 @@ links.click(function(e){
 });
 
 album_back.click(function(e){
-	showSearchResult();
-	e.preventDefault();
+	// showSearchResult();
+	// e.preventDefault();
 });
 
 previous.click(function(e){
@@ -236,15 +236,15 @@ createPlaylistForm.submit(function(e){
 
 function addSongsFromAlbum(songs)
 {
-	$.each(songs, function(key, value){
-			value = $(value);
-			movie = value.data('movie');
-			song = value.data('song');
-			code = value.data('url');
-			vId = value.data('vid');
-			var newID = addToLocalstorage({movie: movie, song: song, constructedUrl: code, vId: vId});
-			addToNowPlaying({movie: movie, song: song, id: newID});
-		});
+	// $.each(songs, function(key, value){
+	// 		value = $(value);
+	// 		movie = value.data('movie');
+	// 		song = value.data('song');
+	// 		code = value.data('url');
+	// 		vId = value.data('vid');
+	// 		var newID = addToLocalstorage({movie: movie, song: song, constructedUrl: code, vId: vId});
+	// 		addToNowPlaying({movie: movie, song: song, id: newID});
+	// 	});
 }
 
 function showSearchResult()
@@ -283,12 +283,12 @@ function bindPlay(){
 	});
 
 	results.on('click', '.addall', function(e){
-		var target = $(e.currentTarget);
-		var movieID = target.data("by");
-		var type = target.data("type");
-		fetchAndAddAllToNowPlayingSongs(movieID, type);
-		displayPurr();
-		e.preventDefault();
+		// var target = $(e.currentTarget);
+		// var movieID = target.data("by");
+		// var type = target.data("type");
+		// fetchAndAddAllToNowPlayingSongs(movieID, type);
+		// displayPurr();
+		// e.preventDefault();
 	})
 
 	nowPlaying.on("click", ".playsong", function(e){
@@ -309,11 +309,11 @@ function bindPlay(){
 	});
 
 	clear_all.click(function(e){
-		localStorage["playlist"] = "";
-		sendMessage({action:"next"});
-		setPlayPause("play");
-		nowPlaying.html("");
-		e.preventDefault();
+		// localStorage["playlist"] = "";
+		// sendMessage({action:"next"});
+		// setPlayPause("play");
+		// nowPlaying.html("");
+		// e.preventDefault();
 	});
 
 }
@@ -324,13 +324,13 @@ function getSongs(){
 }
 
 function fetchAndAddAllToAlbumSongs(movieID, movieName, type){
-	albumName.html(movieName);
-	$.get(songScrapper + "/"+ type +"s/"+movieID, function(data){
-		$.each(data, function(key, value){
-		 	var addView = "<input type='checkbox' data-movie='"+value.movie_name+"' data-song='"+value.name+"' data-url='"+ value.url  +"' data-vid='"+ value._id+"'/>";
-			albumList.append("<li><label>"+ addView + value.name + "<label></li>");
-		});
-	});
+	// albumName.html(movieName);
+	// $.get(songScrapper + "/"+ type +"s/"+movieID, function(data){
+	// 	$.each(data, function(key, value){
+	// 	 	var addView = "<input type='checkbox' data-movie='"+value.movie_name+"' data-song='"+value.name+"' data-url='"+ value.url  +"' data-vid='"+ value._id+"'/>";
+	// 		albumList.append("<li><label>"+ addView + value.name + "<label></li>");
+	// 	});
+	// });
 }
 
 function fetchAndAddAllToNowPlayingSongs(movieID, type){
@@ -379,11 +379,11 @@ function addToNowPlaying(songJson, playImmediately)
 }
 
 function setPlayPause(action){
-	removeAction = action == "play" ? "pause" : "play";
-	icon = $("i", playpause)
-	icon.removeClass("icon-" + removeAction);
-	icon.addClass("icon-" + action);
-	playpause.data("action", action);
+	// removeAction = action == "play" ? "pause" : "play";
+	// icon = $("i", playpause)
+	// icon.removeClass("icon-" + removeAction);
+	// icon.addClass("icon-" + action);
+	// playpause.data("action", action);
 }
 
 function displayPurr(notification)
@@ -448,23 +448,23 @@ function sendMessage(message)
 function init()
 {
 	chrome.extension.sendMessage({message: {action: "init"}}, function(response) {
-		console.log(response);
+		// console.log(response);
 
-		playing.width(response.playPercent * playerLength);
-		currentTime.html(response.currentTime);
-		duration.html(response.duration);
-		buffering.width(response.bufferPercent* playerLength);
-		setVolumeState(response.volume);
-		songName.html(response.songName);
-		$(".playsong[data-id='"+ response.currentSongIndex+"'] ").addClass("current");
-		if(!response.paused)
-			setPlayPause("pause");
-		else
-			setPlayPause("play");
+		// playing.width(response.playPercent * playerLength);
+		// currentTime.html(response.currentTime);
+		// duration.html(response.duration);
+		// buffering.width(response.bufferPercent* playerLength);
+		// setVolumeState(response.volume);
+		// songName.html(response.songName);
+		// $(".playsong[data-id='"+ response.currentSongIndex+"'] ").addClass("current");
+		// if(!response.paused)
+		// 	setPlayPause("pause");
+		// else
+		// 	setPlayPause("play");
 	});
 
-	$.each(getSongs(), function(index, entry){
-		addToNowPlaying({movie: entry.movie, song: entry.song, id: entry.id }, false);
-	});
+	// $.each(getSongs(), function(index, entry){
+	// 	addToNowPlaying({movie: entry.movie, song: entry.song, id: entry.id }, false);
+	// });
 }
 });

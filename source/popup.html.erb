@@ -13,24 +13,24 @@
 		<div class="logo">
 			<span class="like"><iframe src="http://www.facebook.com/plugins/like.php?href=https%3A%2F%2Fwww.facebook.com%2Fvalayosai1&amp;send=false&amp;layout=button_count&amp;width=90&amp;show_faces=false&amp;font&amp;colorscheme=light&amp;action=like&amp;height=21&amp;appId=247333488655259&amp;" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:90px; height:21px;" allowTransparency="true"></iframe></span>
 			வலையோசை<span class="beta">beta<span></div>
-		<div class="player">
+		<div class="player" ng-controller="VPlayerCtrl">
 			<span class="player_icons_contianer">
 				<a id="previous" class= "player_icons" href=""><i class="icon-backward icon-large"></i></a>
-				<a id="playpause" data-action="play" class= "player_icons" href="" ><i class="icon-play icon-large"></i></a>
+				<a id="playpause" data-action="play" class="player_icons" href="" ><i ng-class="playPause"></i></a>
 				<a id="next" class= "player_icons" href=""><i class="icon-forward icon-large"></i></a>
 			</span>
 
 			<span id="progress" class="progress">
-				<span id ="buffering"></span>
-				<span id ="playing" class="bar"></span>
+				<span id ="buffering" ng-style="bufferingWidth"></span>
+				<span id ="playing" class="bar" ng-style="playingWidth"></span>
 			</span>
 			<span class="player_time">
-				<span id="currenttime"> </span> <span>/</span> <span id="duration"></span>
+				<span id="currenttime">{{currentTime}}</span><span>/</span> <span id="duration">{{duration}}</span>
 			</span>
 			<span class="volume_container">
-				<span class="volume_icon" title="Mute"><i class="icon-volume-up"></span></i><input id="volume" type="range" min="0" max="10" value="5" />
+				<span class="volume_icon" title="Mute"><i class="icon-volume-up"></span></i><input id="volume" type="range" min="0" max="10" ng-model="volume" />
 			</span>
-			<div class="song_name_container"><p id="song_name"></p></div>
+			<div class="song_name_container"><p id="song_name">{{songName}}</p></div>
 		</div>
 		<div class="subnav">
 			<ul class="nav nav-pills">
@@ -77,7 +77,7 @@
 
 				<div class="navigators">
 					<a href="{{createPlaylistPopup}}" id="np_create_playlist" ng-click="createPlaylist()" role="button" class="btn btn-primary btn-small" data-toggle="modal">Create Playlist</a>
-					<a href id="np_clear_all" title="Trash all songs"><i class="icon-trash"></i></a>
+					<a href id="np_clear_all" ng-click="destroyAll()" title="Trash all songs"><i class="icon-trash"></i></a>
 				</div>
 				<ul>
 					<li ng-repeat="song in npSongs">
