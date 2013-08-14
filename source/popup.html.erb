@@ -76,7 +76,7 @@
 			<div id="np_container">
 
 				<div class="navigators">
-					<a href id="np_create_playlist" role="button" class="btn btn-primary btn-small" data-toggle="modal">Create Playlist</a>
+					<a href="{{createPlaylistPopup}}" id="np_create_playlist" ng-click="createPlaylist()" role="button" class="btn btn-primary btn-small" data-toggle="modal">Create Playlist</a>
 					<a href id="np_clear_all" title="Trash all songs"><i class="icon-trash"></i></a>
 				</div>
 				<ul>
@@ -98,10 +98,10 @@
   			</div>
 			<div class="modal-body">
 		 		You should have atleast 15 songs in your playlist to create a public playlist. <br>
-		 		<small>Just <span class="more_count"></span> more song(s) to go..</small>
+		 		<small>Just {{15 - npSongs.length}} more song(s) to go..</small>
 		 	</div>
 		</div>
-		<div id="create_playlist" class="modal hide fade" role="dialog" aria-hidden="true"> 
+		<div id="create_playlist" class="modal hide fade" role="dialog" aria-hidden="true" ng-controller="CreatePlaylistCtrl"> 
 			<div class="modal-header green_header" >
     			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     			<h3 id="myModalLabel">Name it!</h3>
@@ -111,8 +111,8 @@
 			<form class="form-inline" id="create_playlist_form">
 			  <fieldset>
 			    <div>
-			    <input type="text" name="playlist_name" id="playlist_name">
-			    <button type="submit" class="btn btn-primary btn-small">Submit</button>
+			    <input type="text" name="playlist_name" ng-model="playlistName" id="playlist_name">
+			    <button type="submit" class="btn btn-primary btn-small" ng-click="createPlaylist()">Submit</button>
 			    <div class="alert-error"></div>
 			    </div>
 			  </fieldset>

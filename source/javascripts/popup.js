@@ -199,38 +199,38 @@ function setVolumeState(volumeVal)
 }
 
 createPlaylist.click(function(e){
-	e.preventDefault();
-	var songs = getSongs();
-	if(songs.length < 15)
-	{
-		moreCount.html(15-songs.length);
-		createPlaylist.attr("href", "#need_more");
-	}
-	else
-	{
-		createPlaylist.attr("href", "#create_playlist");
-	}
+	// e.preventDefault();
+	// var songs = getSongs();
+	// if(songs.length < 15)
+	// {
+	// 	moreCount.html(15-songs.length);
+	// 	createPlaylist.attr("href", "#need_more");
+	// }
+	// else
+	// {
+	// 	createPlaylist.attr("href", "#create_playlist");
+	// }
 });
 createPlaylistForm.submit(function(e){
-	e.preventDefault();
-	var name = playlistName.val().trim();
-	var songs = getSongs();
+	// e.preventDefault();
+	// var name = playlistName.val().trim();
+	// var songs = getSongs();
 
-    if(name == "") { playlistName.val(""); return;}
-	var songIds = [];
-	$.each(songs, function (index, entry) {
-		songIds.push(entry.vId);
-	});
-	$.post(songScrapper +"/playlists", 
-		{
-			name: name,
-			songIds: songIds
-		}, function(data){
-			console.log("playlist created")
-			displayPurr(name + " created");
-	});
-	playlistName.val("");
-	createPlaylistModal.modal("hide");
+ //    if(name == "") { playlistName.val(""); return;}
+	// var songIds = [];
+	// $.each(songs, function (index, entry) {
+	// 	songIds.push(entry.vId);
+	// });
+	// $.post(songScrapper +"/playlists", 
+	// 	{
+	// 		name: name,
+	// 		songIds: songIds
+	// 	}, function(data){
+	// 		console.log("playlist created")
+	// 		displayPurr(name + " created");
+	// });
+	// playlistName.val("");
+	// createPlaylistModal.modal("hide");
 })
 
 

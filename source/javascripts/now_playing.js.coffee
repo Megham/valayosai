@@ -39,15 +39,20 @@ valayosai.directive 'search', ($http, $q, Result) ->
 	{
 		link: (scope, elm, attrs, ctrl) ->
 			elm.bind 'keyup', () ->
+				scope.results = []
 				delay(() ->
-					searchVal = elm.val()
-					searchURL = songScrapper + "/search?q="+ encodeURIComponent(searchVal)
-					$http.get(searchURL, {})
-					.success (data, status, headers, config) ->
-						s = []
-						$.each data, (index, result) ->
-							s.push new Result {type: result._type, name: result.name, movie: result.movie_name, id: result._id, url: result.url}
+					s = []
+					if elm.val().length > 1
+						searchVal = elm.val()
+						searchURL = songScrapper + "/search?q="+ encodeURIComponent(searchVal)
+						$http.get(searchURL, {})
+						.success (data, status, headers, config) ->
+							$.each data, (index, result) ->
+								s.push new Result {type: result._type, name: result.name, movie: result.movie_name, id: result._id, url: result.url}
+
+					scope.$apply () ->
 						scope.results = s
+
 				, 250)
 	}
 
@@ -94,12 +99,29 @@ SearchResultCtrl = ($scope, $rootScope, $http, Result, addToNowPlaying) ->
 
 NowPlayingCtrl = ($rootScope, $scope) ->
 	$rootScope.npSongs = []
+	
 	$scope.removeSong = (song) ->
 		$rootScope.npSongs = $.grep $rootScope.npSongs, (obj)->
 							obj != song
 
+	$scope.createPlaylist = () ->
+		$rootScope.createPlaylistPopup = if $rootScope.npSongs.length < 15 then "#need_more" else "#create_playlist"
+
+CreatePlaylistCtrl = ($rootScope, $scope, $http) ->
+	$scope.playlistName = ""
+	$scope.createPlaylist = () ->
+		$http.post(songScrapper+"/playlists", {name: $scope.playlistName, songIds: $rootScope.npSongs.map((obj) -> obj.id) })
+						.success (data, status, headers, config) ->
+							console.log("success")
+							$("#create_playlist").modal("hide")
+
+
+
+	
+
 window.SearchResultCtrl = SearchResultCtrl
 window.NowPlayingCtrl = NowPlayingCtrl
+window.CreatePlaylistCtrl = CreatePlaylistCtrl
 
 
 
