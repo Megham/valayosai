@@ -34,8 +34,8 @@
 		</div>
 		<div class="subnav">
 			<ul class="nav nav-pills">
-				<li class="active"><a href="#search_panel" class="links" id="np_link">Now Playing</a></li>
-				<li><a href="#nowplaying" class="links">Search</a></li>
+				<li ng-class="!showSearch && 'active'"><a ng-click="showSearch = false" href="#search_panel" class="links" id="np_link">Now Playing</a></li>
+				<li ng-class="showSearch && 'active'"><a ng-click="showSearch = true" href="#nowplaying" class="links">Search</a></li>
 			</ul>
 		</div>
 		<div id="search_panel" class="panel" ng-controller="SearchResultCtrl" ng-show="showSearch">
@@ -53,7 +53,7 @@
 				</ul>
 			</div>
 			<div id="album" ng-show="!showResults" >
-				<div class="back_container"><a href="" ng-click="displayResults()" id="album_back" title="Back to search result"><i class="icon-chevron-left icon-2"></i></a></div>
+				<div class="back_container"><a href="" ng-click="showResults = true" id="album_back" title="Back to search result"><i class="icon-chevron-left icon-2"></i></a></div>
 				<div>
 					<div>
 						<h5 id="album_name">{{album.name}}</h5> 
@@ -90,7 +90,7 @@
 			</div>
 		</div>
 		<div class="thanks">Thanks to <a href="http://tamiltunes.com"/>TamilTunes.com</a></div>
-		<div class="alert purr"></div>
+		<div class="alert purr">{{purr}}</div>
 		<div id="need_more" class="modal hide fade" role="dialog" aria-hidden="true">
 			<div class="modal-header red_header">
     			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>

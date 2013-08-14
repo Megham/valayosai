@@ -1,7 +1,4 @@
 songScrapper = "http://song-scrapper.herokuapp.com";
-resultList = $("#results ul")
-album = $("#album")
-
 valayosai = angular.module('valayosai', [])
 
 delay = (() ->
@@ -22,8 +19,15 @@ valayosai.factory 'Result', () ->
 				if this.movie? then "#{this.name} - #{this.movie}" else this.name
 		})
 	Result
+valayosai.factory 'purr', ($rootScope) ->
+	(message) ->
+		message = "Added" unless message?
+		$rootScope.purr = message
+		purrContainer = $(".purr")
+		purrContainer.fadeIn(200).delay(800).fadeOut(200)
 
-valayosai.factory 'addToNowPlaying', () ->
+
+valayosai.factory 'addToNowPlaying', ($rootScope, purr) ->
 	# playImmediately = typeof playImmediately !== 'undefined' ? playImmediately : true;
 	# var dataID = songJson.id != undefined ? "data-id='" + songJson.id+"'" : '';
 	# nowPlaying.append("<li><span><a class='playsong' data-song='"+songJson.song+"' "+ dataID+ " data-movie='"+songJson.movie+"' href >"+ songJson.song +"-" + songJson.movie +"</a></span><a class='remove_song' href='' "+dataID+"><i class='icon-remove-sign'></i></a></li>");
@@ -31,8 +35,10 @@ valayosai.factory 'addToNowPlaying', () ->
 	# {
 	# 	_gaq.push(['_trackEvent', 'AddSong', 'Added', songJson.song + " - " + songJson.movie]);
 	# }
-	(songJson, scope) ->
-		scope.npSongs.push {name: songJson.name, movie: songJson.movie, id: songJson.id}
+	(songJson, doPurr) ->
+		$rootScope.npSongs.push {name: songJson.name, movie: songJson.movie, id: songJson.id}
+		if doPurr
+			purr()
 		# sendMessage({action: "playSongIfNotPlaying", id: songJson.id})
 
 valayosai.directive 'search', ($http, $q, Result) ->
@@ -57,22 +63,23 @@ valayosai.directive 'search', ($http, $q, Result) ->
 	}
 
 
-SearchResultCtrl = ($scope, $rootScope, $http, Result, addToNowPlaying) ->
-	$scope.showSearch = false
+SearchResultCtrl = ($scope, $rootScope, $http, Result, addToNowPlaying, purr) ->
+	$rootScope.showSearch = false
 	$scope.showResults = true
 	$scope.album = {name: "", songs: []}
 
 	$scope.addSong = (id) ->
 		result = $.grep $scope.results, (obj) ->
 			obj.id == id
-		addToNowPlaying(result[0], $rootScope)
+		addToNowPlaying(result[0], true)
 
 	$scope.addAllSongs = (result) ->
 		getAllSongsUrl = "#{songScrapper}/#{result.type}s/#{result.id}"
 		$http.get(getAllSongsUrl, {})
 			.success (data, status, headers, config) ->
 				$.each data, (key, value) ->
-					addToNowPlaying({name: value.name, movie: value.movie_name, id: value._id, url: value.url}, $rootScope)
+					addToNowPlaying({name: value.name, movie: value.movie_name, id: value._id, url: value.url})
+				purr()
 
 	$scope.showAlbum = (result) ->
 		getAllSongsUrl = "#{songScrapper}/#{result.type}s/#{result.id}"
@@ -86,16 +93,15 @@ SearchResultCtrl = ($scope, $rootScope, $http, Result, addToNowPlaying) ->
 
 	$scope.addAllAlbumSongs = () ->
 		$.each $scope.album.songs, (index, value) ->
-			addToNowPlaying($.extend(value, {movie: $scope.album.name}), $rootScope)
+			addToNowPlaying($.extend(value, {movie: $scope.album.name}))
+		purr()
 
 	$scope.addMarkedAlbumSongs = () ->
 		checkedSongs = $.grep $scope.album.songs, (obj) ->
 			obj.checked == true
 		$.each checkedSongs, (index, value) ->
-			addToNowPlaying($.extend(value, {movie: $scope.album.name}), $rootScope)
-
-	$scope.displayResults = () ->
-		$scope.showResults = true
+			addToNowPlaying($.extend(value, {movie: $scope.album.name}))
+		purr()
 
 NowPlayingCtrl = ($rootScope, $scope) ->
 	$rootScope.npSongs = []

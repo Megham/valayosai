@@ -124,13 +124,13 @@ progress.click(function(e){
 
 });
 links.click(function(e){
-	var target = $(e.currentTarget);
-	var loc = target.attr('href');
-	$(".panel").show();
-	$(loc).hide();
-	$(".nav-pills .active").removeClass("active");
-	target.parent().addClass("active");
-	e.preventDefault();
+	// var target = $(e.currentTarget);
+	// var loc = target.attr('href');
+	// $(".panel").show();
+	// $(loc).hide();
+	// $(".nav-pills .active").removeClass("active");
+	// target.parent().addClass("active");
+	// e.preventDefault();
 });
 
 album_back.click(function(e){
@@ -388,9 +388,9 @@ function setPlayPause(action){
 
 function displayPurr(notification)
 {
-	notification = typeof notification !== 'undefined' ? notification : "Added";
-	purr.html(notification);
-	purr.fadeIn(200).delay(800).fadeOut(200);
+	// notification = typeof notification !== 'undefined' ? notification : "Added";
+	// purr.html(notification);
+	// purr.fadeIn(200).delay(800).fadeOut(200);
 }
 
 chrome.extension.onMessage.addListener(
