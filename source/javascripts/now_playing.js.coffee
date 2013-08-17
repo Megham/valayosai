@@ -54,6 +54,13 @@ valayosai.factory 'LocalStorage', () ->
 
 		,persist: (array) ->
 			localStorage["playlist"] = JSON.stringify array
+
+		,get: (key) ->
+			localStorage[key]
+
+		,set: (key, value) ->
+			localStorage[key] = value
+
 	}
 	LocalStorage
 
@@ -64,6 +71,17 @@ valayosai.factory 'purr', ($rootScope) ->
 		purrContainer = $(".purr")
 		purrContainer.fadeIn(200).delay(800).fadeOut(200)
 
+
+valayosai.factory 'setVolumeState', (LocalStorage, sendMessage) ->
+	(value, scope) ->
+		value = LocalStorage.get("lastVolumeVal") unless value?
+		value = parseInt(value)
+		sendMessage({action: "volume", value: parseFloat(value / 10) })
+		volState = if value != 0 then "up" else "off";
+		LocalStorage.set("volume", volState)
+		LocalStorage.set("lastVolumeVal", value) if volState == "up"
+		scope.volume = value
+		scope.volumeIcon = "icon-volume-#{volState}"
 
 valayosai.factory 'NowPlaying', ($rootScope, purr, LocalStorage, sendMessage) ->
 	# playImmediately = typeof playImmediately !== 'undefined' ? playImmediately : true;
@@ -76,10 +94,11 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, LocalStorage, sendMessage) ->
 	NowPlaying = {
 			add: (songJson, doPurr) ->
 				songHash = {name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url}
-				$rootScope.npSongs.push songHash
-				LocalStorage.add songHash
-				purr() if doPurr
-				# sendMessage({action: "playSongIfNotPlaying", id: songJson.id})
+				unless this.find(songJson.id)
+					$rootScope.npSongs.push songHash
+					LocalStorage.add songHash
+					purr() if doPurr
+					# sendMessage({action: "playSongIfNotPlaying", id: songJson.id})
 			,load: () ->
 				$rootScope.npSongs = LocalStorage.all()
 
@@ -93,26 +112,21 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, LocalStorage, sendMessage) ->
 				LocalStorage.destroy(record.id)
 
 			,playSong: (id) ->
-				playing = this.playing()
-				if playing?
-					playing.state = "played" 
-					LocalStorage.update(playing.id, {state: "played"})
-
+				playing = this.markPlayingPlayed()
 				toPlay = this.find(id)
 				sendMessage({action: "aplaySong", url: toPlay.url, id: toPlay.id})
 				toPlay.state = "playing"
 				LocalStorage.update(toPlay.id, {state: "playing"})
-				# console.log("np - playsong")
 
 			,playNext: () ->
-				playing = this.playing()
+				playing = this.markPlayingPlayed()
 				newPlayingIndex = $rootScope.npSongs.indexOf(playing) + 1
 				unless newPlayingIndex > $rootScope.npSongs.length
 					newPlaying = $rootScope.npSongs[newPlayingIndex]
 					this.playSong(newPlaying.id)
 
 			,playPrevious: () ->
-				playing = this.playing()
+				playing = this.markPlayingPlayed()
 				newPlayingIndex = $rootScope.npSongs.indexOf(playing) - 1
 				unless newPlayingIndex < 0
 					newPlaying = $rootScope.npSongs[newPlayingIndex]
@@ -123,6 +137,13 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, LocalStorage, sendMessage) ->
 
 			,find: (id) ->
 				$.grep($rootScope.npSongs, (obj) -> obj.id == id)[0]
+
+			,markPlayingPlayed: () ->
+				playing = this.playing()
+				if playing?
+					playing.state = "played" 
+					LocalStorage.update(playing.id, {state: "played"})
+				playing
 
 	}
 
@@ -202,7 +223,6 @@ NowPlayingCtrl = ($rootScope, $scope, sendMessage, NowPlaying) ->
 
 	$scope.playSong = (id) ->
 		NowPlaying.playSong(id)
-		# console.log("added succesfully")
 
 CreatePlaylistCtrl = ($rootScope, $scope, $http) ->
 	$scope.playlistName = ""
@@ -212,10 +232,8 @@ CreatePlaylistCtrl = ($rootScope, $scope, $http) ->
 							$("#create_playlist").modal("hide")
 
 
-VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage) ->
-	chrome.extension.sendMessage {message: {action: "init"}}, (response) ->
-		# console.log(response)
-		
+VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState) ->
+	chrome.extension.sendMessage {message: {action: "init"}}, (response) ->		
 		$scope.playingWidth = {width: "#{response.playPercent * playerLength}px"}
 		$scope.bufferingWidth = {width: "#{response.bufferPercent * playerLength}px"}
 		$scope.currentTime = response.currentTime
@@ -224,11 +242,11 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage) ->
 		$scope.songName = if response.id? then NowPlaying.find(response.id).name else ""
 		$scope.playing =  !response.paused
 		$scope.setPlayPause(!response.paused)
+		setVolumeState(response.volume, $scope)
 		$scope.$apply()
 
 
 	chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
-		# console.log(request)
 		command = request.message
 		if(command.action == "timeupdate")
 			$scope.playingWidth = {width: "#{command.percent * playerLength}px"}
@@ -243,9 +261,7 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage) ->
 			$scope.bufferingWidth = {width: "#{command.value * playerLength}px"}
 
 		if(command.action == "ended")
-			$scope.playPause = "icon-pause"
-			$scope.currentTime = "0.0"
-			$scope.playingWidth = {width: "0px"}
+			NowPlaying.playNext()
 
 		if(command.action == "preparePlayerForNewSong")
 			$scope.songName = NowPlaying.find(command.id).name
@@ -255,9 +271,6 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage) ->
 			$scope.bufferingWidth = {width: "0px"}
 			$scope.setPlayPause(false)
 			$scope.loadSongClass = "audio_loading"
-			#mark current
-			# $(".playsong").removeClass("current");
-			# $(".playsong[data-id='"+ command.songIndex+"'] ").addClass("current");
 		
 		if(command.action == "setPlayingNew")
 			$scope.setPlayPause(true)
@@ -267,9 +280,7 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage) ->
 	$scope.doPlayPause = ()->
 		action = if $scope.playPause == "play" then "pause" else "play"
 		sendMessage({action: action})
-
 		$scope.setPlayPause(!($scope.playPause == "play"))
-
 
 	$scope.playNext = () ->
 		NowPlaying.playNext()
@@ -288,6 +299,12 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage) ->
 		seekPos = (e.pageX - posX)
 		sendMessage({action: "setSeek", value: seekPos/playerLength} )
 
+	$scope.setVolume = (e) ->
+		setVolumeState($scope.volume, $scope)
+	
+	$scope.toggelMuteVolume = () ->
+		volumeVal = if ($scope.volume != 0) then 0 else null;
+		setVolumeState(volumeVal, $scope)
 	
 window.SearchResultCtrl = SearchResultCtrl
 window.NowPlayingCtrl = NowPlayingCtrl

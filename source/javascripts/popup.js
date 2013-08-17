@@ -171,13 +171,13 @@ thanksLinks.click(function(e){
 });
 
 volume.change(function(){
-	setVolumeState(this.value)
+	// setVolumeState(this.value)
 });
 
 volumeIcon.click(function(e){
-	var volumeState = localStorage["volume"]
-	var volumeVal = (volumeState == "ON" || volumeState == undefined) ? 0 : localStorage["lastVolumeVal"];
-	setVolumeState(volumeVal)
+	// var volumeState = localStorage["volume"]
+	// var volumeVal = (volumeState == "ON" || volumeState == undefined) ? 0 : localStorage["lastVolumeVal"];
+	// setVolumeState(volumeVal)
 });
 
 

@@ -44,8 +44,8 @@ chrome.extension.onMessage.addListener(
 			sendResponse(response);
 		}
 
-		if (command.action == "previous") {playPrevious()};
-		if (command.action == "next") {playNext()};
+		// if (command.action == "previous") {playPrevious()};
+		// if (command.action == "next") {playNext()};
 		if(command.action == "playSong"){playSong(command.value)};
 		if(command.action == "removeIfPlaying"){
 		 	if(command.id == currentSongIndex) playNext(); 
@@ -83,7 +83,6 @@ audio.addEventListener('progress', function(){
 
 audio.addEventListener('ended', function(){
 	sendMessage({action: 'ended'});
-	playNext();
 }, false);
 
 
@@ -102,21 +101,21 @@ function sendAudioBuffering()
 }
 function playNext()
 {
-	var currentSongArrayIndex = getCurrentSongArrayIndex()
-	if(currentSongArrayIndex >= totalSongs() - 1)
-	{
-		setAudio(null, null, null);
-		return;
-	}
-	playSong(getSongId(currentSongArrayIndex + 1));
+	// var currentSongArrayIndex = getCurrentSongArrayIndex()
+	// if(currentSongArrayIndex >= totalSongs() - 1)
+	// {
+	// 	setAudio(null, null, null);
+	// 	return;
+	// }
+	// playSong(getSongId(currentSongArrayIndex + 1));
 }
-function playPrevious()
-{
-	var currentSongArrayIndex = getCurrentSongArrayIndex()
-	if(currentSongArrayIndex == 0)
-		return;
-	playSong(getSongId(currentSongArrayIndex -1));
-}
+// function playPrevious()
+// {
+// 	var currentSongArrayIndex = getCurrentSongArrayIndex()
+// 	if(currentSongArrayIndex == 0)
+// 		return;
+// 	playSong(getSongId(currentSongArrayIndex -1));
+// }
 
 function playSong(songIndex)
 {

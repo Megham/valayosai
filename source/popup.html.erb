@@ -28,7 +28,7 @@
 				<span id="currenttime">{{currentTime}}</span><span>/</span> <span id="duration">{{duration}}</span>
 			</span>
 			<span class="volume_container">
-				<span class="volume_icon" title="Mute"><i class="icon-volume-up"></span></i><input id="volume" type="range" min="0" max="10" ng-model="volume" />
+				<span class="volume_icon" title="Mute" ng-click="toggelMuteVolume()"><i ng-class="volumeIcon"></span></i><input id="volume" ng-click="setVolume($event)" type="range" min="0" max="10" value="volume" ng-model="volume" />
 			</span>
 			<div class="song_name_container"><p id="song_name">{{songName}}</p></div>
 		</div>
