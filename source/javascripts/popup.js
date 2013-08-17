@@ -115,12 +115,12 @@ playpause.click(function(e){
 // });
 
 progress.click(function(e){
-	var posX = $(this).offset().left, posY = $(this).offset().top;
-	var seekPos = (e.pageX - posX);
-    console.log((e.pageX - posX)+ ' , ' + (e.pageY - posY));
-    sendMessage({action: "setSeek", value: seekPos/progress.width()} )
-    e.preventDefault();
-    e.stopPropagation();
+	// var posX = $(this).offset().left, posY = $(this).offset().top;
+	// var seekPos = (e.pageX - posX);
+ //    console.log((e.pageX - posX)+ ' , ' + (e.pageY - posY));
+ //    sendMessage({action: "setSeek", value: seekPos/progress.width()} )
+ //    e.preventDefault();
+ //    e.stopPropagation();
 
 });
 links.click(function(e){
@@ -447,7 +447,7 @@ function sendMessage(message)
 
 function init()
 {
-	chrome.extension.sendMessage({message: {action: "init"}}, function(response) {
+	// chrome.extension.sendMessage({message: {action: "init"}}, function(response) {
 		// console.log(response);
 
 		// playing.width(response.playPercent * playerLength);
@@ -461,7 +461,7 @@ function init()
 		// 	setPlayPause("pause");
 		// else
 		// 	setPlayPause("play");
-	});
+	// });
 
 	// $.each(getSongs(), function(index, entry){
 	// 	addToNowPlaying({movie: entry.movie, song: entry.song, id: entry.id }, false);

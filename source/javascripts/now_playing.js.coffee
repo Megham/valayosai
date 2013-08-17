@@ -282,6 +282,12 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage) ->
 		revertAction = if isPlaying then "pause" else "play"
 		$scope.playPause = action
 		$scope.playPauseIcon = "icon-#{revertAction}"
+
+	$scope.seekDuration = (e) ->
+		posX = $(e.currentTarget).offset().left
+		seekPos = (e.pageX - posX)
+		sendMessage({action: "setSeek", value: seekPos/playerLength} )
+
 	
 window.SearchResultCtrl = SearchResultCtrl
 window.NowPlayingCtrl = NowPlayingCtrl

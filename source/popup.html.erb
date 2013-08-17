@@ -20,7 +20,7 @@
 				<a id="next" class= "player_icons" href="" ng-click="playNext()"><i class="icon-forward icon-large"></i></a>
 			</span>
 
-			<span id="progress" class="progress">
+			<span id="progress" class="progress" ng-click="seekDuration($event)">
 				<span id ="buffering" ng-style="bufferingWidth"></span>
 				<span id ="playing" class="bar" ng-style="playingWidth"></span>
 			</span>
