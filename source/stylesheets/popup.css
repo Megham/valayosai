@@ -195,7 +195,7 @@ border-bottom: 1px solid transparent;
 	color:white;
 	display: block;
 }
-#nowplaying li .playsong.current{
+#nowplaying li .playsong.playing{
 	color:greenyellow;
 	display: block;
 }
@@ -310,12 +310,12 @@ body *::-webkit-scrollbar-button:start:decrement,#doc ::-webkit-scrollbar-button
 }
 
 .loading{
-	background: url("logo/loading.gif") no-repeat center;
+	background: url("../images/loading.gif") no-repeat center;
 	height: 210px;
 }
 
 .audio_loading{
-	background: url("logo/audio_loading.gif") no-repeat center;
+	background: url("../images/audio_loading.gif") no-repeat center;
 	width: 51px;
 	height: 20px;
 }

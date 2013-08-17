@@ -68,12 +68,12 @@ var delay = (function(){
 })();
 
 playpause.click(function(e){
-	var target = $(e.currentTarget);
-	var todo = target.data("action") ;
-	var nextAction = target.data("action") == "play" ? "pause" : "play";
-	setPlayPause(nextAction);
-	sendMessage({action: todo});
-	e.preventDefault();
+	// var target = $(e.currentTarget);
+	// var todo = target.data("action") ;
+	// var nextAction = target.data("action") == "play" ? "pause" : "play";
+	// setPlayPause(nextAction);
+	// sendMessage({action: todo});
+	// e.preventDefault();
 });
 
 // search.keyup(function(){
@@ -139,13 +139,13 @@ album_back.click(function(e){
 });
 
 previous.click(function(e){
-	sendMessage({action: "previous"})
-	e.preventDefault();
+	// sendMessage({action: "previous"})
+	// e.preventDefault();
 });
 
 next.click(function(e){
-	sendMessage({action: "next"})
-	e.preventDefault();
+	// sendMessage({action: "next"})
+	// e.preventDefault();
 });
 
 np_add_all.click(function(e){
@@ -292,9 +292,9 @@ function bindPlay(){
 	})
 
 	nowPlaying.on("click", ".playsong", function(e){
-		var index = $(e.currentTarget).data("id");
-		sendMessage({action:"playSong", value: index});
-		e.preventDefault();
+		// var index = $(e.currentTarget).data("id");
+		// sendMessage({action:"playSong", value: index});
+		// e.preventDefault();
 	});
 
 	nowPlaying.on("click", ".remove_song", function(e){
@@ -347,23 +347,23 @@ function fetchAndAddAllToNowPlayingSongs(movieID, type){
 
 function addToLocalstorage(songJson)
 {
-	var existingPlaylist = getSongs();
-	var playlistLength = existingPlaylist.length;
-	var newID =  playlistLength == 0 ? 0 : existingPlaylist[playlistLength-1].id + 1;
-	$.extend(songJson, {id: newID})
-	existingPlaylist.push(songJson);
-	localStorage["playlist"] =  JSON.stringify(existingPlaylist);
-	return newID;
+	// var existingPlaylist = getSongs();
+	// var playlistLength = existingPlaylist.length;
+	// var newID =  playlistLength == 0 ? 0 : existingPlaylist[playlistLength-1].id + 1;
+	// $.extend(songJson, {id: newID})
+	// existingPlaylist.push(songJson);
+	// localStorage["playlist"] =  JSON.stringify(existingPlaylist);
+	// return newID;
 }
 
 function removeFromLocalStorage(index){
-	var existingPlaylist = getSongs();
-	var newSongList = [];
-	$.each(existingPlaylist, function(ind, value){
-		if(value.id != index)
-			newSongList.push(value)
-	});
-	localStorage["playlist"] = JSON.stringify(newSongList);
+	// var existingPlaylist = getSongs();
+	// var newSongList = [];
+	// $.each(existingPlaylist, function(ind, value){
+	// 	if(value.id != index)
+	// 		newSongList.push(value)
+	// });
+	// localStorage["playlist"] = JSON.stringify(newSongList);
 
 }
 function addToNowPlaying(songJson, playImmediately)
@@ -393,50 +393,50 @@ function displayPurr(notification)
 	// purr.fadeIn(200).delay(800).fadeOut(200);
 }
 
-chrome.extension.onMessage.addListener(
-	function(request, sender, sendResponse) {
-		var command = request.message;
-		if(command.action == "timeupdate")
-		{
-			playing.width(command.percent * playerLength);
-			currentTime.html(command.value);
-		}
-		if(command.action == "loadedmetadata")
-		{
-			duration.html(command.value);
-			setPlayPause("pause");
-			playerTime.removeClass("audio_loading");
-		}
+// chrome.extension.onMessage.addListener(
+// 	function(request, sender, sendResponse) {
+// 		var command = request.message;
+// 		if(command.action == "timeupdate")
+// 		{
+// 			playing.width(command.percent * playerLength);
+// 			currentTime.html(command.value);
+// 		}
+// 		if(command.action == "loadedmetadata")
+// 		{
+// 			duration.html(command.value);
+// 			setPlayPause("pause");
+// 			playerTime.removeClass("audio_loading");
+// 		}
 
-		if(command.action == "bufferpercent")
-		{
-			buffering.width(command.value * playerLength);
-		}
-		if(command.action == "ended")
-		{
-			setPlayPause("play");
-			currentTime.html("0.0");
-			playing.width(0);	
-		}
+// 		if(command.action == "bufferpercent")
+// 		{
+// 			buffering.width(command.value * playerLength);
+// 		}
+// 		if(command.action == "ended")
+// 		{
+// 			setPlayPause("play");
+// 			currentTime.html("0.0");
+// 			playing.width(0);	
+// 		}
 
-		if(command.action == "displaySongName")
-		{
-			songName.html(command.value);
-			currentTime.html("0.00");
-			duration.html("0.00");
-			playing.width("0px");
-			buffering.width("0px");
-			var action = command.value == null ? "play" : "pause"
-			setPlayPause(action);
-			$(".playsong").removeClass("current");
-			$(".playsong[data-id='"+ command.songIndex+"'] ").addClass("current");
-		}
-		if(command.action == "setPlayingNew")
-		{
-			setPlayPause("play");
-			playerTime.addClass("audio_loading");
-		}
-	});
+// 		if(command.action == "displaySongName")
+// 		{
+// 			songName.html(command.value);
+// 			currentTime.html("0.00");
+// 			duration.html("0.00");
+// 			playing.width("0px");
+// 			buffering.width("0px");
+// 			var action = command.value == null ? "play" : "pause"
+// 			setPlayPause(action);
+// 			$(".playsong").removeClass("current");
+// 			$(".playsong[data-id='"+ command.songIndex+"'] ").addClass("current");
+// 		}
+// 		if(command.action == "setPlayingNew")
+// 		{
+// 			setPlayPause("play");
+// 			playerTime.addClass("audio_loading");
+// 		}
+// 	});
 
 
 function sendMessage(message)

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<title></title>
-		<%= javascript_include_tag "jquery-1.9.1.min.js", "angular.min.js", "now_playing.js", "popup.js", "bootstrap.js"%>
+		<%= javascript_include_tag "jquery-1.9.1.min.js", "angular.min.js", "now_playing.js",  "bootstrap.js"%>
 		<%= stylesheet_link_tag "popup.css", "bootstrap.css", "font-awesome.css"%>
 		
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -15,16 +15,16 @@
 			வலையோசை<span class="beta">beta<span></div>
 		<div class="player" ng-controller="VPlayerCtrl">
 			<span class="player_icons_contianer">
-				<a id="previous" class= "player_icons" href=""><i class="icon-backward icon-large"></i></a>
-				<a id="playpause" data-action="play" class="player_icons" href="" ><i ng-class="playPause"></i></a>
-				<a id="next" class= "player_icons" href=""><i class="icon-forward icon-large"></i></a>
+				<a id="previous" class= "player_icons" href="" ng-click="playPrevious()"><i class="icon-backward icon-large"></i></a>
+				<a id="playpause" data-action="play" ng-click="doPlayPause()" class="player_icons" href="" ><i ng-class="playPauseIcon" class="icon-large"></i></a>
+				<a id="next" class= "player_icons" href="" ng-click="playNext()"><i class="icon-forward icon-large"></i></a>
 			</span>
 
 			<span id="progress" class="progress">
 				<span id ="buffering" ng-style="bufferingWidth"></span>
 				<span id ="playing" class="bar" ng-style="playingWidth"></span>
 			</span>
-			<span class="player_time">
+			<span class="player_time" ng-class="loadSongClass">
 				<span id="currenttime">{{currentTime}}</span><span>/</span> <span id="duration">{{duration}}</span>
 			</span>
 			<span class="volume_container">
@@ -82,7 +82,7 @@
 				<ul>
 					<li ng-repeat="song in npSongs">
 						<span>
-							<a class='playsong' href>{{song.name}} - {{song.movie}}</a>
+							<a class='playsong' ng-class="song.state" ng-click="playSong(song.id)" href>{{song.name}} - {{song.movie}}</a>
 						</span>
 						<a class='remove_song' href='' ng-click="removeSong(song)" data-id="{{song.id}}"><i class='icon-remove-sign'></i></a>
 					</li>

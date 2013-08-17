@@ -21,12 +21,16 @@ valayosai.factory 'Result', () ->
 		})
 	Result
 
+valayosai.factory 'sendMessage', () ->
+	(message) ->
+		chrome.extension.sendMessage {message: message}, (response) ->
+
 valayosai.factory 'LocalStorage', () ->
 	LocalStorage = {
 		add: (songJson) ->
 			existingPlaylist = this.all()
 			existingPlaylist.push songJson
-			localStorage["playlist"] = JSON.stringify existingPlaylist
+			this.persist existingPlaylist
 
 		,all: () ->
 			playlist = localStorage["playlist"]
@@ -36,10 +40,20 @@ valayosai.factory 'LocalStorage', () ->
 			existingPlaylist = this.all()
 			existingPlaylist = $.grep existingPlaylist, (obj) ->
 								obj.id != id
-			localStorage["playlist"] = JSON.stringify existingPlaylist
+			this.persist existingPlaylist
 
 		,destroyAll: () ->
-			localStorage["playlist"] = "[]"
+			this.persist []
+
+		,update: (id, values) ->
+			existingPlaylist = this.all()
+			$.each existingPlaylist, (index, value) ->
+				if existingPlaylist[index].id == id
+					existingPlaylist[index] = $.extend(existingPlaylist[index], values)
+			this.persist existingPlaylist
+
+		,persist: (array) ->
+			localStorage["playlist"] = JSON.stringify array
 	}
 	LocalStorage
 
@@ -51,7 +65,7 @@ valayosai.factory 'purr', ($rootScope) ->
 		purrContainer.fadeIn(200).delay(800).fadeOut(200)
 
 
-valayosai.factory 'addToNowPlaying', ($rootScope, purr, LocalStorage) ->
+valayosai.factory 'NowPlaying', ($rootScope, purr, LocalStorage, sendMessage) ->
 	# playImmediately = typeof playImmediately !== 'undefined' ? playImmediately : true;
 	# var dataID = songJson.id != undefined ? "data-id='" + songJson.id+"'" : '';
 	# nowPlaying.append("<li><span><a class='playsong' data-song='"+songJson.song+"' "+ dataID+ " data-movie='"+songJson.movie+"' href >"+ songJson.song +"-" + songJson.movie +"</a></span><a class='remove_song' href='' "+dataID+"><i class='icon-remove-sign'></i></a></li>");
@@ -59,11 +73,58 @@ valayosai.factory 'addToNowPlaying', ($rootScope, purr, LocalStorage) ->
 	# {
 	# 	_gaq.push(['_trackEvent', 'AddSong', 'Added', songJson.song + " - " + songJson.movie]);
 	# }
-	(songJson, doPurr) ->
-		$rootScope.npSongs.push {name: songJson.name, movie: songJson.movie, id: songJson.id}
-		LocalStorage.add {name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url }
-		purr() if doPurr
-		# sendMessage({action: "playSongIfNotPlaying", id: songJson.id})
+	NowPlaying = {
+			add: (songJson, doPurr) ->
+				songHash = {name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url}
+				$rootScope.npSongs.push songHash
+				LocalStorage.add songHash
+				purr() if doPurr
+				# sendMessage({action: "playSongIfNotPlaying", id: songJson.id})
+			,load: () ->
+				$rootScope.npSongs = LocalStorage.all()
+
+			,destroyAll: () ->
+				$rootScope.npSongs = []
+				LocalStorage.destroyAll()
+
+			,destroy: (record) ->
+				$rootScope.npSongs = $.grep $rootScope.npSongs, (obj)->
+							obj != record
+				LocalStorage.destroy(record.id)
+
+			,playSong: (id) ->
+				playing = this.playing()
+				if playing?
+					playing.state = "played" 
+					LocalStorage.update(playing.id, {state: "played"})
+
+				toPlay = this.find(id)
+				sendMessage({action: "aplaySong", url: toPlay.url, id: toPlay.id})
+				toPlay.state = "playing"
+				LocalStorage.update(toPlay.id, {state: "playing"})
+				# console.log("np - playsong")
+
+			,playNext: () ->
+				playing = this.playing()
+				newPlayingIndex = $rootScope.npSongs.indexOf(playing) + 1
+				unless newPlayingIndex > $rootScope.npSongs.length
+					newPlaying = $rootScope.npSongs[newPlayingIndex]
+					this.playSong(newPlaying.id)
+
+			,playPrevious: () ->
+				playing = this.playing()
+				newPlayingIndex = $rootScope.npSongs.indexOf(playing) - 1
+				unless newPlayingIndex < 0
+					newPlaying = $rootScope.npSongs[newPlayingIndex]
+					this.playSong(newPlaying.id)
+
+			,playing: () ->
+				$.grep($rootScope.npSongs, (obj) -> obj.state == "playing")[0]
+
+			,find: (id) ->
+				$.grep($rootScope.npSongs, (obj) -> obj.id == id)[0]
+
+	}
 
 valayosai.directive 'search', ($http, $q, Result) ->
 	{
@@ -87,7 +148,7 @@ valayosai.directive 'search', ($http, $q, Result) ->
 	}
 
 
-SearchResultCtrl = ($scope, $rootScope, $http, Result, addToNowPlaying, purr) ->
+SearchResultCtrl = ($scope, $rootScope, $http, Result, NowPlaying, purr) ->
 	$rootScope.showSearch = false
 	$scope.showResults = true
 	$scope.album = {name: "", songs: []}
@@ -95,14 +156,14 @@ SearchResultCtrl = ($scope, $rootScope, $http, Result, addToNowPlaying, purr) ->
 	$scope.addSong = (id) ->
 		result = $.grep $scope.results, (obj) ->
 			obj.id == id
-		addToNowPlaying(result[0], true)
+		NowPlaying.add(result[0], true)
 
 	$scope.addAllSongs = (result) ->
 		getAllSongsUrl = "#{songScrapper}/#{result.type}s/#{result.id}"
 		$http.get(getAllSongsUrl, {})
 			.success (data, status, headers, config) ->
 				$.each data, (key, value) ->
-					addToNowPlaying({name: value.name, movie: value.movie_name, id: value._id, url: value.url})
+					NowPlaying.add({name: value.name, movie: value.movie_name, id: value._id, url: value.url})
 				purr()
 
 	$scope.showAlbum = (result) ->
@@ -117,83 +178,112 @@ SearchResultCtrl = ($scope, $rootScope, $http, Result, addToNowPlaying, purr) ->
 
 	$scope.addAllAlbumSongs = () ->
 		$.each $scope.album.songs, (index, value) ->
-			addToNowPlaying($.extend(value, {movie: $scope.album.name}))
+			NowPlaying.add($.extend(value, {movie: $scope.album.name}))
 		purr()
 
 	$scope.addMarkedAlbumSongs = () ->
 		checkedSongs = $.grep $scope.album.songs, (obj) ->
 			obj.checked == true
 		$.each checkedSongs, (index, value) ->
-			addToNowPlaying($.extend(value, {movie: $scope.album.name}))
+			NowPlaying.add($.extend(value, {movie: $scope.album.name}))
 		purr()
 
-NowPlayingCtrl = ($rootScope, $scope, LocalStorage) ->	
+NowPlayingCtrl = ($rootScope, $scope, sendMessage, NowPlaying) ->
+	NowPlaying.load()
+
 	$scope.removeSong = (song) ->
-		$rootScope.npSongs = $.grep $rootScope.npSongs, (obj)->
-							obj != song
-		LocalStorage.destroy(song.id)
+		NowPlaying.destroy(song)
 
 	$scope.createPlaylist = () ->
 		$rootScope.createPlaylistPopup = if $rootScope.npSongs.length < 15 then "#need_more" else "#create_playlist"
 
 	$scope.destroyAll = () ->
-		$rootScope.npSongs = []
-		LocalStorage.destroyAll()
+		NowPlaying.destroyAll()
 
+	$scope.playSong = (id) ->
+		NowPlaying.playSong(id)
+		# console.log("added succesfully")
 
 CreatePlaylistCtrl = ($rootScope, $scope, $http) ->
 	$scope.playlistName = ""
 	$scope.createPlaylist = () ->
 		$http.post(songScrapper+"/playlists", {name: $scope.playlistName, songIds: $rootScope.npSongs.map((obj) -> obj.id) })
 						.success (data, status, headers, config) ->
-							console.log("success")
 							$("#create_playlist").modal("hide")
 
 
-VPlayerCtrl = ($scope, $rootScope, LocalStorage) ->
+VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage) ->
 	chrome.extension.sendMessage {message: {action: "init"}}, (response) ->
-		console.log(response)
-		$scope.$apply () ->
-			$scope.playingWidth = {width: "#{response.playPercent * playerLength}px"}
-			$scope.bufferingWidth = {width: "#{response.bufferPercent * playerLength}px"}
-
-			$scope.currentTime = response.currentTime
-			$scope.duration = response.duration
-			$scope.volume = response.volume
-			$scope.songName = response.songName
-			$scope.playing =  !response.paused
-			$scope.playPause = if response.paused then "icon-play icon-large" else "icon-pause icon-large"
-	$rootScope.npSongs = LocalStorage.all()
-
-	$scope.play = ()->
+		# console.log(response)
+		
+		$scope.playingWidth = {width: "#{response.playPercent * playerLength}px"}
+		$scope.bufferingWidth = {width: "#{response.bufferPercent * playerLength}px"}
+		$scope.currentTime = response.currentTime
+		$scope.duration = response.duration
+		$scope.volume = response.volume
+		$scope.songName = if response.id? then NowPlaying.find(response.id).name else ""
+		$scope.playing =  !response.paused
+		$scope.setPlayPause(!response.paused)
+		$scope.$apply()
 
 
+	chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
+		# console.log(request)
+		command = request.message
+		if(command.action == "timeupdate")
+			$scope.playingWidth = {width: "#{command.percent * playerLength}px"}
+			$scope.currentTime = command.value
+
+		if(command.action == "loadedmetadata")
+			$scope.duration = command.value
+			$scope.setPlayPause(true)
+			$scope.loadSongClass = ""
+
+		if(command.action == "bufferpercent")
+			$scope.bufferingWidth = {width: "#{command.value * playerLength}px"}
+
+		if(command.action == "ended")
+			$scope.playPause = "icon-pause"
+			$scope.currentTime = "0.0"
+			$scope.playingWidth = {width: "0px"}
+
+		if(command.action == "preparePlayerForNewSong")
+			$scope.songName = NowPlaying.find(command.id).name
+			$scope.currentTime = "0.00"
+			$scope.duration = "0.00"
+			$scope.playingWidth = {width : "0px"}
+			$scope.bufferingWidth = {width: "0px"}
+			$scope.setPlayPause(false)
+			$scope.loadSongClass = "audio_loading"
+			#mark current
+			# $(".playsong").removeClass("current");
+			# $(".playsong[data-id='"+ command.songIndex+"'] ").addClass("current");
+		
+		if(command.action == "setPlayingNew")
+			$scope.setPlayPause(true)
+
+		$scope.$apply()
+
+	$scope.doPlayPause = ()->
+		action = if $scope.playPause == "play" then "pause" else "play"
+		sendMessage({action: action})
+
+		$scope.setPlayPause(!($scope.playPause == "play"))
 
 
+	$scope.playNext = () ->
+		NowPlaying.playNext()
 
+	$scope.playPrevious = () ->
+		NowPlaying.playPrevious()
 
-
-
-	# 	playing.width(response.playPercent * playerLength);
-	# 	currentTime.html(response.currentTime);
-	# 	duration.html(response.duration);
-	# 	buffering.width(response.bufferPercent* playerLength);
-	# 	setVolumeState(response.volume);
-	# 	songName.html(response.songName);
-	# 	$(".playsong[data-id='"+ response.currentSongIndex+"'] ").addClass("current");
-	# 	if(!response.paused)
-	# 		setPlayPause("pause");
-	# 	else
-	# 		setPlayPause("play");
-
-	# $.each(getSongs(), function(index, entry){
-	# 	addToNowPlaying({movie: entry.movie, song: entry.song, id: entry.id }, false);
-	# });
-
+	$scope.setPlayPause = (isPlaying) ->
+		action = if isPlaying then "play" else "pause"
+		revertAction = if isPlaying then "pause" else "play"
+		$scope.playPause = action
+		$scope.playPauseIcon = "icon-#{revertAction}"
 	
 window.SearchResultCtrl = SearchResultCtrl
 window.NowPlayingCtrl = NowPlayingCtrl
 window.CreatePlaylistCtrl = CreatePlaylistCtrl
 window.VPlayerCtrl = VPlayerCtrl
-
-

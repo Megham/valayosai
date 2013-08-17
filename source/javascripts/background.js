@@ -3,10 +3,12 @@ $("body").append("<audio id='main_player' controls><source id='player_src' type=
 var audio = $('#main_player')[0];
 var audioSrc = $('#player_src')[0];
 var currentSongIndex = null;
+// console.log("begin")
 
 chrome.extension.onMessage.addListener(
 	function(request, sender, sendResponse) {
 		var command = request.message;
+		// console.log(command)
 		var audio = $('#main_player')[0];
 		if(command.action == "pause")
 		{
@@ -38,7 +40,7 @@ chrome.extension.onMessage.addListener(
 			var playPercent = audio.currentTime/ audio.duration;
 			$.extend(response, {song: audio.src, duration:  getFormattedTime(audio.duration), currentTime: getFormattedTime(audio.currentTime) ,
 			 				playPercent: playPercent, bufferPercent: getBufferPercent(),
-			  				paused: audio.paused, songName: $(audio).data("song"), volume: parseInt(audio.volume*10), currentSongIndex: currentSongIndex});
+			  				paused: audio.paused, id: $(audio).data("id"), volume: parseInt(audio.volume*10)});
 			sendResponse(response);
 		}
 
@@ -50,6 +52,16 @@ chrome.extension.onMessage.addListener(
 		 	sendResponse({removed: true});
 		};
 
+		if(command.action == "aplaySong")
+		{
+			// console.log("bg - playing")
+			audioSrc.src = command.url;
+			audio.pause();
+			audio.load();
+			$(audio).data("id", command.id);
+			audio.play();
+			sendMessage({action:"preparePlayerForNewSong", id: command.id });
+		}
 	});
 
 
