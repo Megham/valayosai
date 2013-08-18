@@ -96,54 +96,32 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, LocalStorage, sendMessage) ->
 				songHash = {name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url}
 				unless this.find(songJson.id)
 					$rootScope.npSongs.push songHash
-					LocalStorage.add songHash
 					purr() if doPurr
-					# sendMessage({action: "playSongIfNotPlaying", id: songJson.id})
+					sendMessage({action: "add", name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url})
+
 			,load: () ->
 				$rootScope.npSongs = LocalStorage.all()
 
 			,destroyAll: () ->
+				sendMessage({action: "destroyAll"})
 				$rootScope.npSongs = []
-				LocalStorage.destroyAll()
 
 			,destroy: (record) ->
+				sendMessage({action: "destroy", id: record.id})
 				$rootScope.npSongs = $.grep $rootScope.npSongs, (obj)->
 							obj != record
-				LocalStorage.destroy(record.id)
 
 			,playSong: (id) ->
-				playing = this.markPlayingPlayed()
-				toPlay = this.find(id)
-				sendMessage({action: "aplaySong", url: toPlay.url, id: toPlay.id})
-				toPlay.state = "playing"
-				LocalStorage.update(toPlay.id, {state: "playing"})
+				sendMessage({action: "aplaySong", id: id})
 
 			,playNext: () ->
-				playing = this.markPlayingPlayed()
-				newPlayingIndex = $rootScope.npSongs.indexOf(playing) + 1
-				unless newPlayingIndex > $rootScope.npSongs.length
-					newPlaying = $rootScope.npSongs[newPlayingIndex]
-					this.playSong(newPlaying.id)
+				sendMessage({action: "playNext"})
 
 			,playPrevious: () ->
-				playing = this.markPlayingPlayed()
-				newPlayingIndex = $rootScope.npSongs.indexOf(playing) - 1
-				unless newPlayingIndex < 0
-					newPlaying = $rootScope.npSongs[newPlayingIndex]
-					this.playSong(newPlaying.id)
-
-			,playing: () ->
-				$.grep($rootScope.npSongs, (obj) -> obj.state == "playing")[0]
+				sendMessage({action: "playPrevious"})
 
 			,find: (id) ->
 				$.grep($rootScope.npSongs, (obj) -> obj.id == id)[0]
-
-			,markPlayingPlayed: () ->
-				playing = this.playing()
-				if playing?
-					playing.state = "played" 
-					LocalStorage.update(playing.id, {state: "played"})
-				playing
 
 	}
 
@@ -264,13 +242,22 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState) ->
 			NowPlaying.playNext()
 
 		if(command.action == "preparePlayerForNewSong")
-			$scope.songName = NowPlaying.find(command.id).name
+			playingSong = NowPlaying.find(command.id)
+			playingSong.state = "playing"
+			$scope.songName = playingSong.name
+			$scope.loadSongClass = "audio_loading"
+
+		if(command.action == "emptyPlayer")
+			playedSong = NowPlaying.find(command.playedId)
+			playedSong.state = "played" if playedSong?
+			$scope.songName = ""
 			$scope.currentTime = "0.00"
 			$scope.duration = "0.00"
 			$scope.playingWidth = {width : "0px"}
 			$scope.bufferingWidth = {width: "0px"}
 			$scope.setPlayPause(false)
-			$scope.loadSongClass = "audio_loading"
+			$scope.loadSongClass = ""
+
 		
 		if(command.action == "setPlayingNew")
 			$scope.setPlayPause(true)
