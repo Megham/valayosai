@@ -45,25 +45,17 @@ Playlist =
 			this.playSong(songJson.id) unless this.playing()?
 
 	destroyAll: () ->
+		this.markPlayingPlayed()
 		LocalStorage.destroyAll()
-		audioSrc.src = ""
-		audio.pause()
-		this.markPlayingPlayed()
 
-	destroy: (record) ->
-		LocalStorage.destroy(record.id)
-		audioSrc.src = ""
-		audio.pause()
-		this.markPlayingPlayed()
+	destroy: (id) ->
+		this.playNext()
+		LocalStorage.destroy(id)
 
 	playSong: (id) ->
 		played = this.markPlayingPlayed()
 		playedId = if played? then played.id else null
-		audio.pause()
-		audioSrc.src = ""
-		audio.load()
-		$(audio).data "id", null
-
+		this.resetPlayer()
 		if id?
 			toPlay = this.find(id)
 			LocalStorage.update(toPlay.id, {state: "playing"})
@@ -103,11 +95,17 @@ Playlist =
 
 	markPlayingPlayed: () ->
 		playing = this.playing()
+		this.resetPlayer()
 		if playing?
 			LocalStorage.update(playing.id, {state: "played"})
 			sendMessage({action: "emptyPlayer", playedId: playing.id})
 		playing
 
+	resetPlayer: () ->
+		audio.pause()
+		audioSrc.src = ""
+		audio.load()
+		$(audio).data "id", null
 
 chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 	command = request.message
@@ -131,10 +129,10 @@ chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 		Playlist.playNext()
 
 	if command.action is "destroy"
-		LocalStorage.destroy(command.id)
+		Playlist.destroy(command.id)
 	
 	if command.action is "destroyAll"
-		LocalStorage.destroyAll()
+		Playlist.destroyAll()
 	
 	if command.action is "add"
 		Playlist.add {name: command.name, movie: command.movie, url: command.url, id: command.id}
@@ -170,6 +168,26 @@ chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 	
 
 
+getFormattedTime = (time) ->
+	time = (if isNaN(time) then 0 else parseInt(time))
+	seconds = (time % 60) + ""
+	s = (if seconds.length is 1 then "0" + seconds else seconds)
+	m = parseInt((time / 60) % 60)
+	m + "." + s
+
+sendAudioBuffering = ->
+	sendMessage	{action: "bufferpercent", value: getBufferPercent()}
+
+
+getBufferPercent = ->
+	return 0  if audio.buffered.length is 0
+	buffered = (if audio.buffered.length is 0 then 0 else audio.buffered.length - 1)
+	durationLoaded = audio.buffered.end(buffered)
+	durationLoaded / audio.duration
+
+sendMessage = (message) ->
+	chrome.extension.sendMessage message: message
+
 audio.addEventListener("timeupdate", ()->
 		currentPercent = audio.currentTime / audio.duration
 		sendMessage	{action: "timeupdate",	value: getFormattedTime(audio.currentTime),	percent: currentPercent}
@@ -184,82 +202,3 @@ audio.addEventListener "ended", () ->
 		# sendMessage action: "ended"
 		Playlist.playNext()
 	, false
-
-# console.log("begin")
-# console.log(command)
-# console.log("bg - playing")
-getFormattedTime = (time) ->
-	time = (if isNaN(time) then 0 else parseInt(time))
-	seconds = (time % 60) + ""
-	s = (if seconds.length is 1 then "0" + seconds else seconds)
-	m = parseInt((time / 60) % 60)
-	m + "." + s
-
-sendAudioBuffering = ->
-	sendMessage	{action: "bufferpercent", value: getBufferPercent()}
-
-# playNext = ->
-# 	currentSongArrayIndex = getCurrentSongArrayIndex()
-# 	if currentSongArrayIndex >= totalSongs() - 1
-# 		setAudio null, null, null
-# 		return
-# 		playSong getSongId(currentSongArrayIndex + 1)
-
-# playPrevious = ->
-# 	currentSongArrayIndex = getCurrentSongArrayIndex()
-# 	return  if currentSongArrayIndex is 0
-# 	playSong getSongId(currentSongArrayIndex - 1)
-
-# playSong = (songIndex) ->
-# 	audioPaused = audio.paused
-# 	setSource songIndex
-# 	audio.play()
-# 	sendMessage action: "setPlayingNew"
-
-# setSource = (songIndex) ->
-# 	songObj = getSong(songIndex)
-# 	displayName = songObj.movie + " - " + songObj.song
-# 	setAudio displayName, songObj.constructedUrl, songIndex
-
-# setAudio = (displayName, url, songIndex) ->
-# 	currentSongIndex = songIndex
-# 	audioSrc.src = url
-# 	audio.pause()
-# 	audio.load()
-# 	$(audio).data "song", displayName
-# 	sendMessage
-# 	action: "displaySongName"
-# 	value: displayName
-# 	songIndex: songIndex
-
-# getSong = (songIndex) ->
-# 	songObj = jQuery.grep(getSongs(), (element, index) ->
-# 		element.id is songIndex
-# 		)[0]
-# 	songObj
-
-# getSongs = ->
-# 	playlist = localStorage["playlist"]
-# 	(if (playlist is `undefined` or playlist is "" or not playlist?) then [] else JSON.parse(playlist))
-
-# getSongId = (arrayIndex) ->
-# 	getSongs()[arrayIndex].id
-
-# getCurrentSongArrayIndex = ->
-# 		currentSongArrayIndex = null
-# 		allSongs = getSongs()
-# 		$.each allSongs, (ind, value) ->
-# 			currentSongArrayIndex = allSongs.indexOf(value)  if value.id is currentSongIndex
-
-# 			currentSongArrayIndex
-# totalSongs = ->
-# 	getSongs().length
-
-getBufferPercent = ->
-	return 0  if audio.buffered.length is 0
-	buffered = (if audio.buffered.length is 0 then 0 else audio.buffered.length - 1)
-	durationLoaded = audio.buffered.end(buffered)
-	durationLoaded / audio.duration
-
-sendMessage = (message) ->
-	chrome.extension.sendMessage message: message
