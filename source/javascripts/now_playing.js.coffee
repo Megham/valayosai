@@ -124,6 +124,7 @@ valayosai.directive 'search', ($http, $q, Result) ->
 
 					scope.$apply () ->
 						scope.results = s
+						scope.showResults = true
 
 				, 250)
 	}
