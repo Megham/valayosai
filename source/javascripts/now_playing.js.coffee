@@ -238,9 +238,6 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState) ->
 		if(command.action == "bufferpercent")
 			$scope.bufferingWidth = {width: "#{command.value * playerLength}px"}
 
-		if(command.action == "ended")
-			NowPlaying.playNext()
-
 		if(command.action == "preparePlayerForNewSong")
 			playingSong = NowPlaying.find(command.id)
 			playingSong.state = "playing"

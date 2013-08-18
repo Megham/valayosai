@@ -68,15 +68,14 @@ Playlist =
 	playNext: () ->
 		allSongs = LocalStorage.all()
 		newPlayingIndex = this.indexOfPlaying() + 1
-		newSongID =  if newPlayingIndex >= allSongs.length then null else allSongs[newPlayingIndex].id
-		this.playSong(newSongID)
+		newPlayingIndex =  0 if newPlayingIndex >= allSongs.length
+		this.playSong(allSongs[newPlayingIndex].id)
 
 	playPrevious: () ->
 		allSongs = LocalStorage.all()
 		newPlayingIndex = this.indexOfPlaying() - 1
-		unless newPlayingIndex < 0
-			newPlaying = allSongs[newPlayingIndex]
-			this.playSong(newPlaying.id)
+		newPlayingIndex = allSongs.length - 1 if newPlayingIndex < 0
+		this.playSong(allSongs[newPlayingIndex].id)
 
 	playing: () ->
 		$.grep(LocalStorage.all(), (obj) -> obj.state == "playing")[0]
@@ -199,6 +198,5 @@ audio.addEventListener("loadedmetadata", () ->
 audio.addEventListener "loadstart", (() -> 	sendAudioBuffering()), false
 audio.addEventListener "progress", (() -> sendAudioBuffering()), false
 audio.addEventListener "ended", () -> 	
-		# sendMessage action: "ended"
 		Playlist.playNext()
 	, false
