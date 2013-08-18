@@ -27,40 +27,11 @@ valayosai.factory 'sendMessage', () ->
 
 valayosai.factory 'LocalStorage', () ->
 	LocalStorage = {
-		add: (songJson) ->
-			existingPlaylist = this.all()
-			existingPlaylist.push songJson
-			this.persist existingPlaylist
-
-		,all: () ->
-			playlist = localStorage["playlist"]
-			playlist = if (playlist? and playlist !=  "") then JSON.parse(playlist) else []
-
-		,destroy: (id) ->
-			existingPlaylist = this.all()
-			existingPlaylist = $.grep existingPlaylist, (obj) ->
-								obj.id != id
-			this.persist existingPlaylist
-
-		,destroyAll: () ->
-			this.persist []
-
-		,update: (id, values) ->
-			existingPlaylist = this.all()
-			$.each existingPlaylist, (index, value) ->
-				if existingPlaylist[index].id == id
-					existingPlaylist[index] = $.extend(existingPlaylist[index], values)
-			this.persist existingPlaylist
-
-		,persist: (array) ->
-			localStorage["playlist"] = JSON.stringify array
-
 		,get: (key) ->
 			localStorage[key]
 
 		,set: (key, value) ->
 			localStorage[key] = value
-
 	}
 	LocalStorage
 
@@ -98,9 +69,6 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, LocalStorage, sendMessage) ->
 					$rootScope.npSongs.push songHash
 					purr() if doPurr
 					sendMessage({action: "add", name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url})
-
-			,load: () ->
-				$rootScope.npSongs = LocalStorage.all()
 
 			,destroyAll: () ->
 				sendMessage({action: "destroyAll"})
@@ -188,8 +156,6 @@ SearchResultCtrl = ($scope, $rootScope, $http, Result, NowPlaying, purr) ->
 		purr()
 
 NowPlayingCtrl = ($rootScope, $scope, sendMessage, NowPlaying) ->
-	NowPlaying.load()
-
 	$scope.removeSong = (song) ->
 		NowPlaying.destroy(song)
 
@@ -212,6 +178,7 @@ CreatePlaylistCtrl = ($rootScope, $scope, $http) ->
 
 VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState) ->
 	chrome.extension.sendMessage {message: {action: "init"}}, (response) ->		
+		$rootScope.npSongs = JSON.parse response.allSongs
 		$scope.playingWidth = {width: "#{response.playPercent * playerLength}px"}
 		$scope.bufferingWidth = {width: "#{response.bufferPercent * playerLength}px"}
 		$scope.currentTime = response.currentTime

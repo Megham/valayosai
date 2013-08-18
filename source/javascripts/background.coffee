@@ -152,6 +152,7 @@ chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 		paused: audio.paused
 		id: $(audio).data("id")
 		volume: parseInt(audio.volume * 10)
+		allSongs: localStorage["playlist"]
 		sendResponse response
 
 	# playSong command.id  if audioSrc.src is ""  if command.action is "playSongIfNotPlaying"
