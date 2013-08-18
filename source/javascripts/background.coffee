@@ -37,6 +37,8 @@ LocalStorage =
 
 	set: (key, value) ->
 		localStorage[key] = value
+	remove: (key) ->
+		localStorage.removeItem(key)
 
 Playlist =
 	add: (songJson) ->
@@ -45,11 +47,15 @@ Playlist =
 			this.playSong(songJson.id) unless this.playing()?
 
 	destroyAll: () ->
+		if LocalStorage.get("loop")?
+			this.toggleLoopPlaying()
 		this.markPlayingPlayed()
 		LocalStorage.destroyAll()
 
 	destroy: (id) ->
-		this.playNext()
+		if LocalStorage.get("loop")? && LocalStorage.get("loop") == id
+			this.toggleLoopPlaying()
+		this.playNext() if this.playing().id == id
 		LocalStorage.destroy(id)
 
 	playSong: (id) ->
@@ -64,21 +70,33 @@ Playlist =
 			$(audio).data "id", id
 			audio.play()
 			sendMessage	{action: "preparePlayerForNewSong", id: id}
+			if LocalStorage.get("loop")? && LocalStorage.get("loop") != id
+				this.toggleLoopPlaying()
 
 	playNext: () ->
 		allSongs = LocalStorage.all()
 		newPlayingIndex = this.indexOfPlaying() + 1
 		newPlayingIndex =  0 if newPlayingIndex >= allSongs.length
-		this.playSong(allSongs[newPlayingIndex].id)
+		newSongID = if LocalStorage.get("loop")? then LocalStorage.get("loop") else allSongs[newPlayingIndex].id
+		this.playSong(newSongID)
 
 	playPrevious: () ->
 		allSongs = LocalStorage.all()
 		newPlayingIndex = this.indexOfPlaying() - 1
 		newPlayingIndex = allSongs.length - 1 if newPlayingIndex < 0
-		this.playSong(allSongs[newPlayingIndex].id)
+		newSongID = if LocalStorage.get("loop")? then LocalStorage.get("loop") else allSongs[newPlayingIndex].id
+		this.playSong(newSongID)
 
 	playing: () ->
 		$.grep(LocalStorage.all(), (obj) -> obj.state == "playing")[0]
+
+	toggleLoopPlaying: () ->
+		if LocalStorage.get("loop")?
+			LocalStorage.remove("loop")
+		else
+			LocalStorage.set("loop", this.playing().id)
+		sendMessage({action: "setLooping", loopValue: LocalStorage.get("loop")})
+
 
 	indexOfPlaying: () ->
 		allSongs = LocalStorage.all()
@@ -153,19 +171,11 @@ chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 		id: $(audio).data("id")
 		volume: parseInt(audio.volume * 10)
 		allSongs: localStorage["playlist"]
+		loopValue: LocalStorage.get("loop")
 		sendResponse response
 
-	# playSong command.id  if audioSrc.src is ""  if command.action is "playSongIfNotPlaying"
-	
-
-
-		
-	# playSong command.value  if command.action is "playSong"
-
-	# if command.action is "removeIfPlaying"
-	# 	playNext()  if command.id is currentSongIndex
-	# 	sendResponse removed: true
-	
+	if command.action is "loopPlaying"
+		loopValue = Playlist.toggleLoopPlaying()
 
 
 getFormattedTime = (time) ->

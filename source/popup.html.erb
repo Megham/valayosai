@@ -27,6 +27,9 @@
 			<span class="player_time" ng-class="loadSongClass">
 				<span id="currenttime">{{currentTime}}</span><span>/</span> <span id="duration">{{duration}}</span>
 			</span>
+			<span ng-click="toggleLoopOne()" class="loop_contianer" ng-class="loopActiveClass">
+				<i class="icon-repeat"></i>
+			</span>
 			<span class="volume_container">
 				<span class="volume_icon" title="Mute" ng-click="toggelMuteVolume()"><i ng-class="volumeIcon"></span></i><input id="volume" ng-click="setVolume($event)" type="range" min="0" max="10" value="volume" ng-model="volume" />
 			</span>

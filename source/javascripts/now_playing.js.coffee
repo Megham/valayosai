@@ -21,6 +21,15 @@ valayosai.factory 'Result', () ->
 		})
 	Result
 
+valayosai.factory 'Song', () ->
+	Song = (data) ->
+		angular.extend(this, data);
+		angular.extend(this, {
+			displayName: () ->
+				"#{this.name} - #{this.movie}"
+		})
+	Song
+
 valayosai.factory 'sendMessage', () ->
 	(message) ->
 		chrome.extension.sendMessage {message: message}, (response) ->
@@ -54,7 +63,7 @@ valayosai.factory 'setVolumeState', (LocalStorage, sendMessage) ->
 		scope.volume = value
 		scope.volumeIcon = "icon-volume-#{volState}"
 
-valayosai.factory 'NowPlaying', ($rootScope, purr, LocalStorage, sendMessage) ->
+valayosai.factory 'NowPlaying', ($rootScope, purr, sendMessage, Song) ->
 	# playImmediately = typeof playImmediately !== 'undefined' ? playImmediately : true;
 	# var dataID = songJson.id != undefined ? "data-id='" + songJson.id+"'" : '';
 	# nowPlaying.append("<li><span><a class='playsong' data-song='"+songJson.song+"' "+ dataID+ " data-movie='"+songJson.movie+"' href >"+ songJson.song +"-" + songJson.movie +"</a></span><a class='remove_song' href='' "+dataID+"><i class='icon-remove-sign'></i></a></li>");
@@ -66,7 +75,7 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, LocalStorage, sendMessage) ->
 			add: (songJson, doPurr) ->
 				songHash = {name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url}
 				unless this.find(songJson.id)
-					$rootScope.npSongs.push songHash
+					$rootScope.npSongs.push new Song(songHash)
 					purr() if doPurr
 					sendMessage({action: "add", name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url})
 
@@ -90,6 +99,11 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, LocalStorage, sendMessage) ->
 
 			,find: (id) ->
 				$.grep($rootScope.npSongs, (obj) -> obj.id == id)[0]
+
+			,initialize: (allSongString) ->
+				$rootScope.npSongs = []
+				$.each JSON.parse(allSongString), (i, v) ->
+					$rootScope.npSongs.push(new Song(v))
 
 	}
 
@@ -176,17 +190,19 @@ CreatePlaylistCtrl = ($rootScope, $scope, $http) ->
 							$("#create_playlist").modal("hide")
 
 
-VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState) ->
+VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr) ->
 	chrome.extension.sendMessage {message: {action: "init"}}, (response) ->		
-		$rootScope.npSongs = JSON.parse response.allSongs
+		NowPlaying.initialize(response.allSongs)
 		$scope.playingWidth = {width: "#{response.playPercent * playerLength}px"}
 		$scope.bufferingWidth = {width: "#{response.bufferPercent * playerLength}px"}
 		$scope.currentTime = response.currentTime
 		$scope.duration = response.duration
 		$scope.volume = response.volume
-		$scope.songName = if response.id? then NowPlaying.find(response.id).name else ""
+		$scope.songName = NowPlaying.find(response.id).displayName() if response.id?
 		$scope.playing =  !response.paused
 		$scope.setPlayPause(!response.paused)
+		$scope.loopValue = response.loopValue
+		$scope.loopActiveClass = if response.loopValue? then "active" else ""
 		setVolumeState(response.volume, $scope)
 		$scope.$apply()
 
@@ -208,7 +224,7 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState) ->
 		if(command.action == "preparePlayerForNewSong")
 			playingSong = NowPlaying.find(command.id)
 			playingSong.state = "playing"
-			$scope.songName = playingSong.name
+			$scope.songName = playingSong.displayName()
 			$scope.loadSongClass = "audio_loading"
 
 		if(command.action == "emptyPlayer")
@@ -222,7 +238,16 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState) ->
 			$scope.setPlayPause(false)
 			$scope.loadSongClass = ""
 
-		
+		if command.action == "setLooping"
+			if command.loopValue?
+				$scope.loopValue = command.loopValue
+				$scope.loopActiveClass = "active"
+				purr("#{NowPlaying.find(command.loopValue).name} is in loop")
+			else
+				purr("Loop mode switched off")
+				$scope.loopValue = null
+				$scope.loopActiveClass = ""
+
 		if(command.action == "setPlayingNew")
 			$scope.setPlayPause(true)
 
@@ -235,9 +260,11 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState) ->
 
 	$scope.playNext = () ->
 		NowPlaying.playNext()
+		purr("This song is in loop") if $scope.loopActiveClass == "active"
 
 	$scope.playPrevious = () ->
 		NowPlaying.playPrevious()
+		purr("This song is in loop") if $scope.loopActiveClass == "active"
 
 	$scope.setPlayPause = (isPlaying) ->
 		action = if isPlaying then "play" else "pause"
@@ -256,7 +283,10 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState) ->
 	$scope.toggelMuteVolume = () ->
 		volumeVal = if ($scope.volume != 0) then 0 else null;
 		setVolumeState(volumeVal, $scope)
-	
+
+	$scope.toggleLoopOne = () ->
+		sendMessage({action:"loopPlaying"})
+
 window.SearchResultCtrl = SearchResultCtrl
 window.NowPlayingCtrl = NowPlayingCtrl
 window.CreatePlaylistCtrl = CreatePlaylistCtrl
