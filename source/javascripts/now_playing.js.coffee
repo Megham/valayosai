@@ -77,7 +77,7 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, sendMessage, Song) ->
 				unless this.find(songJson.id)
 					$rootScope.npSongs.push new Song(songHash)
 					purr() if doPurr
-					sendMessage({action: "add", name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url})
+					sendMessage({action: "add", name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url, state: "new"})
 
 			,destroyAll: () ->
 				sendMessage({action: "destroyAll"})
@@ -229,8 +229,6 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 			$scope.loadSongClass = "audio_loading"
 
 		if(command.action == "emptyPlayer")
-			playedSong = NowPlaying.find(command.playedId)
-			playedSong.state = "played" if playedSong?
 			$scope.songName = ""
 			$scope.currentTime = "0.00"
 			$scope.duration = "0.00"
@@ -238,6 +236,10 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 			$scope.bufferingWidth = {width: "0px"}
 			$scope.setPlayPause(false)
 			$scope.loadSongClass = ""
+		if command.action == "updatePlayed"
+			playedSong = NowPlaying.find(command.playedId)
+			playedSong.state = "played" if playedSong?
+
 
 		if command.action == "setLooping"
 			if command.loopValue?

@@ -29,6 +29,12 @@ LocalStorage =
 				existingPlaylist[index] = $.extend(existingPlaylist[index], values)
 		this.persist existingPlaylist
 
+	updateAllNew: () ->
+		existingPlaylist = this.all()
+		$.each existingPlaylist, (index, value) ->
+			existingPlaylist[index].state = "new"
+		this.persist existingPlaylist
+
 	persist: (array) ->
 		localStorage["playlist"] = JSON.stringify array
 
@@ -47,21 +53,23 @@ Playlist =
 			this.playSong(songJson.id) unless this.playing()?
 
 	destroyAll: () ->
-		if LocalStorage.get("loop")?
-			this.toggleLoopPlaying()
-		this.markPlayingPlayed()
+		LocalStorage.remove("loop")
 		LocalStorage.destroyAll()
+		this.resetPlayer()
 
 	destroy: (id) ->
 		if LocalStorage.get("loop")? && LocalStorage.get("loop") == id
 			this.toggleLoopPlaying()
-		this.playNext() if this.playing().id == id
+		playing = this.playing()
+		allSongs = LocalStorage.all()
+		if playing.id == id && allSongs.length == 1
+			this.resetPlayer()
+		if playing.id == id && allSongs.length > 1
+			this.playNext()	
 		LocalStorage.destroy(id)
 
 	playSong: (id) ->
-		played = this.markPlayingPlayed()
-		playedId = if played? then played.id else null
-		this.resetPlayer()
+		this.markPlayingPlayed()
 		if id?
 			toPlay = this.find(id)
 			LocalStorage.update(toPlay.id, {state: "playing"})
@@ -76,7 +84,9 @@ Playlist =
 	playNext: () ->
 		allSongs = LocalStorage.all()
 		newPlayingIndex = this.indexOfPlaying() + 1
-		newPlayingIndex =  0 if newPlayingIndex >= allSongs.length
+		if newPlayingIndex >= allSongs.length
+			newPlayingIndex =  0
+			LocalStorage.updateAllNew()
 		newSongID = if LocalStorage.get("loop")? then LocalStorage.get("loop") else allSongs[newPlayingIndex].id
 		this.playSong(newSongID)
 
@@ -115,7 +125,7 @@ Playlist =
 		this.resetPlayer()
 		if playing?
 			LocalStorage.update(playing.id, {state: "played"})
-			sendMessage({action: "emptyPlayer", playedId: playing.id})
+			sendMessage({action: "updatePlayed", playedId: playing.id})
 		playing
 
 	resetPlayer: () ->
@@ -123,6 +133,8 @@ Playlist =
 		audioSrc.src = ""
 		audio.load()
 		$(audio).data "id", null
+		sendMessage({action: "emptyPlayer"})	
+
 
 chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 	command = request.message
@@ -152,7 +164,7 @@ chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 		Playlist.destroyAll()
 	
 	if command.action is "add"
-		Playlist.add {name: command.name, movie: command.movie, url: command.url, id: command.id}
+		Playlist.add {name: command.name, movie: command.movie, url: command.url, state: command.state, id: command.id}
 
 	if command.action == "aplaySong"
 		Playlist.playSong command.id
