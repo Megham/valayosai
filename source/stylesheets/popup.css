@@ -22,13 +22,11 @@
 	margin: 0px 10px;
 	float: left;
 }
-.player{
-	
-}
 .player_time{
 	float: left;
 	font-size: 10px;
 	margin-top: 4px;
+	width:50px;
 }
 #progress{
 	width: 250px;
@@ -57,7 +55,7 @@
 
 #volume{
 	-webkit-appearance: none;
-	width: 150px;
+	width: 130px;
 	height: 5px;
 	margin-left: 5px;
 	background: lightgoldenrodyellow;
@@ -335,15 +333,19 @@ body *::-webkit-scrollbar-button:start:decrement,#doc ::-webkit-scrollbar-button
 	background-color: maroon;
 }	
 
-.loop_contianer{
+.loop_container{
 	float: left;
-	margin: 6px 0px 0px 6px;
+	margin: 5px 0px 0px 6px;
 }
-.loop_contianer.active{
+.shuffle_contianer{
+	float: left;
+	margin: 6px 0px 0px 6px;	
+}
+.loop_container.active, .shuffle_contianer.active{
 	color: #33b5e5;
 }
 
-.loop_contianer:hover{
+.loop_container:hover, .shuffle_contianer:hover{
 	color: #33b5e5;
 	cursor: pointer;
 }

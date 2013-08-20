@@ -204,6 +204,7 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 		$scope.setPlayPause(!response.paused)
 		$scope.loopValue = response.loopValue
 		$scope.loopActiveClass = if response.loopValue? then "active" else ""
+		$scope.shuffleActiveClass = response.shuffleValue
 		setVolumeState(response.volume, $scope)
 		$scope.$apply()
 
@@ -236,10 +237,10 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 			$scope.bufferingWidth = {width: "0px"}
 			$scope.setPlayPause(false)
 			$scope.loadSongClass = ""
+
 		if command.action == "updatePlayed"
 			playedSong = NowPlaying.find(command.playedId)
 			playedSong.state = "played" if playedSong?
-
 
 		if command.action == "setLooping"
 			if command.loopValue?
@@ -247,9 +248,16 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 				$scope.loopActiveClass = "active"
 				purr("#{NowPlaying.find(command.loopValue).name} is in loop")
 			else
-				purr("Loop mode switched off")
+				purr("Loop mode switched OFF")
 				$scope.loopValue = null
 				$scope.loopActiveClass = ""
+
+		if command.action == "setShuffle"
+			$scope.shuffleActiveClass = command.value
+			if command.value == "active"
+				purr("Shuffle mode ON")
+			else
+				purr("Shuffle mode OFF")
 
 		if(command.action == "setPlayingNew")
 			$scope.setPlayPause(true)
@@ -289,6 +297,10 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 
 	$scope.toggleLoopOne = () ->
 		sendMessage({action:"loopPlaying"})
+
+	$scope.toggleShuffle = () ->
+		sendMessage({action:"shufflePlaylist"})
+
 
 window.SearchResultCtrl = SearchResultCtrl
 window.NowPlayingCtrl = NowPlayingCtrl

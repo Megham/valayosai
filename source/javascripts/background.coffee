@@ -107,6 +107,12 @@ Playlist =
 			LocalStorage.set("loop", this.playing().id)
 		sendMessage({action: "setLooping", loopValue: LocalStorage.get("loop")})
 
+	toggleShufflePlaylist: () ->
+		currentShuffle = LocalStorage.get("shuffle")
+		newShuffle = if currentShuffle == "active" then "" else "active"
+		LocalStorage.set("shuffle", newShuffle)
+		sendMessage({action: "setShuffle", value: newShuffle})
+
 
 	indexOfPlaying: () ->
 		allSongs = LocalStorage.all()
@@ -184,10 +190,15 @@ chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 		volume: parseInt(audio.volume * 10)
 		allSongs: localStorage["playlist"]
 		loopValue: LocalStorage.get("loop")
+		shuffleValue: LocalStorage.get("shuffle")
 		sendResponse response
 
 	if command.action is "loopPlaying"
 		loopValue = Playlist.toggleLoopPlaying()
+
+	if command.action is "shufflePlaylist"
+		Playlist.toggleShufflePlaylist()
+
 
 
 getFormattedTime = (time) ->
