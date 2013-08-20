@@ -34,6 +34,7 @@ LocalStorage =
 		$.each existingPlaylist, (index, value) ->
 			existingPlaylist[index].state = "new"
 		this.persist existingPlaylist
+		sendMessage({action: "updateAllNew"})
 
 	persist: (array) ->
 		localStorage["playlist"] = JSON.stringify array
@@ -86,7 +87,7 @@ Playlist =
 		newPlayingIndex = this.indexOfPlaying() + 1
 		if newPlayingIndex >= allSongs.length
 			newPlayingIndex =  0
-			LocalStorage.updateAllNew()
+		newPlayingIndex = this.shuffleNext() if LocalStorage.get("shuffle") == "active"
 		newSongID = if LocalStorage.get("loop")? then LocalStorage.get("loop") else allSongs[newPlayingIndex].id
 		this.playSong(newSongID)
 
@@ -96,6 +97,16 @@ Playlist =
 		newPlayingIndex = allSongs.length - 1 if newPlayingIndex < 0
 		newSongID = if LocalStorage.get("loop")? then LocalStorage.get("loop") else allSongs[newPlayingIndex].id
 		this.playSong(newSongID)
+
+	shuffleNext: () ->
+		playing = this.playing()
+		LocalStorage.updateAllNew() if $.grep(LocalStorage.all(), (obj) -> obj.state == "new").length == 0
+		allSongs = LocalStorage.all()
+		notPlayedArr = []
+		$.each allSongs, (i, v) ->
+			notPlayedArr.push allSongs.indexOf(v) if v.state == "new" && playing.id != v.id
+		notPlayedArr = [0] if notPlayedArr.length == 0
+		notPlayedArr[Math.floor(Math.random() * notPlayedArr.length)];
 
 	playing: () ->
 		$.grep(LocalStorage.all(), (obj) -> obj.state == "playing")[0]

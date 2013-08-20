@@ -262,6 +262,9 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 		if(command.action == "setPlayingNew")
 			$scope.setPlayPause(true)
 
+		if(command.action == "updateAllNew")
+			$.each $rootScope.npSongs, (i,v) -> v.state = "new"
+
 		$scope.$apply()
 
 	$scope.doPlayPause = ()->
