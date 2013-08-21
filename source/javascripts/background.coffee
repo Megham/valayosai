@@ -202,7 +202,7 @@ chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 		allSongs: localStorage["playlist"]
 		loopValue: LocalStorage.get("loop")
 		shuffleValue: LocalStorage.get("shuffle")
-		sendResponse response
+		sendMessage $.extend(response, {action: "initResponse"})
 
 	if command.action is "loopPlaying"
 		loopValue = Playlist.toggleLoopPlaying()

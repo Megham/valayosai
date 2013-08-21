@@ -202,25 +202,23 @@ CreatePlaylistCtrl = ($rootScope, $scope, $http) ->
 
 
 VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr) ->
-	chrome.extension.sendMessage {message: {action: "init"}}, (response) ->		
-		NowPlaying.initialize(response.allSongs)
-		$scope.playingWidth = {width: "#{response.playPercent * playerLength}px"}
-		$scope.bufferingWidth = {width: "#{response.bufferPercent * playerLength}px"}
-		$scope.currentTime = response.currentTime
-		$scope.duration = response.duration
-		$scope.volume = response.volume
-		$scope.songName = NowPlaying.find(response.id).displayName() if response.id?
-		$scope.playing =  !response.paused
-		$scope.setPlayPause(!response.paused)
-		$scope.loopValue = response.loopValue
-		$scope.loopActiveClass = if response.loopValue? then "active" else ""
-		$scope.shuffleActiveClass = response.shuffleValue
-		setVolumeState(response.volume, $scope)
-		$scope.$apply()
-
-
 	chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 		command = request.message
+		if command.action == "initResponse"
+			NowPlaying.initialize(command.allSongs)
+			$scope.playingWidth = {width: "#{command.playPercent * playerLength}px"}
+			$scope.bufferingWidth = {width: "#{command.bufferPercent * playerLength}px"}
+			$scope.currentTime = command.currentTime
+			$scope.duration = command.duration
+			$scope.volume = command.volume
+			$scope.songName = NowPlaying.find(command.id).displayName() if command.id?
+			$scope.playing =  !command.paused
+			$scope.setPlayPause(!command.paused)
+			$scope.loopValue = command.loopValue
+			$scope.loopActiveClass = if command.loopValue? then "active" else ""
+			$scope.shuffleActiveClass = command.shuffleValue
+			setVolumeState(command.volume, $scope)
+
 		if(command.action == "timeupdate")
 			$scope.playingWidth = {width: "#{command.percent * playerLength}px"}
 			$scope.currentTime = command.value
@@ -319,3 +317,6 @@ window.SearchResultCtrl = SearchResultCtrl
 window.NowPlayingCtrl = NowPlayingCtrl
 window.CreatePlaylistCtrl = CreatePlaylistCtrl
 window.VPlayerCtrl = VPlayerCtrl
+$ () ->
+	chrome.extension.sendMessage {message: {action: "init"}}
+	$("#fb_like_iframe")[0].src = "http://www.facebook.com/plugins/like.php?href=https://www.facebook.com/valayosai1&send=false&layout=button_count&width=90&show_faces=false&font&colorscheme=light&action=like&height=21&appId=247333488655259&"
