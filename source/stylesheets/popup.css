@@ -356,4 +356,6 @@ body *::-webkit-scrollbar-button:start:decrement,#doc ::-webkit-scrollbar-button
 	font-size: 10px;
 	padding: 2px 6px;
 	line-height: 13px;
-}
+	position: absolute;
+	margin-left: 5px;
+}	
