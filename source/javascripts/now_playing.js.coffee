@@ -202,6 +202,9 @@ CreatePlaylistCtrl = ($rootScope, $scope, $http) ->
 
 
 VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr) ->
+	$scope.playPause = "pause"
+	$scope.playPauseIcon = "icon-play"
+
 	chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 		command = request.message
 		if command.action == "initResponse"
@@ -311,7 +314,6 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 
 	$scope.toggleShuffle = () ->
 		sendMessage({action:"shufflePlaylist"})
-
 
 window.SearchResultCtrl = SearchResultCtrl
 window.NowPlayingCtrl = NowPlayingCtrl

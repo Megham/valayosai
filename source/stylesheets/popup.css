@@ -351,3 +351,9 @@ body *::-webkit-scrollbar-button:start:decrement,#doc ::-webkit-scrollbar-button
 	color: #33b5e5;
 	cursor: pointer;
 }
+.songsCount{
+	font-weight: normal;
+	font-size: 10px;
+	padding: 2px 6px;
+	line-height: 13px;
+}

@@ -3,7 +3,7 @@
 	<head>
 		<title></title>
 		<%= javascript_include_tag "jquery-1.9.1.min.js", "angular.min.js", "now_playing.js",  "bootstrap.js"%>
-		<%= stylesheet_link_tag "popup.css", "bootstrap.css", "font-awesome.css"%>
+		<%= stylesheet_link_tag "bootstrap.css", "font-awesome.css", "popup.css"%>
 		
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	</head>
@@ -40,7 +40,7 @@
 		</div>
 		<div class="subnav">
 			<ul class="nav nav-pills">
-				<li ng-class="!showSearch && 'active'"><a ng-click="showSearch = false" href="#search_panel" class="links" id="np_link">Now Playing</a></li>
+				<li ng-class="!showSearch && 'active'"><a ng-click="showSearch = false" href="#search_panel" class="links" id="np_link">Now Playing <span class=" badge badge-info songsCount">{{npSongs.length}}</span></a></li>
 				<li ng-class="showSearch && 'active'"><a ng-click="showSearch = true" href="#nowplaying" class="links">Search</a></li>
 			</ul>
 		</div>
