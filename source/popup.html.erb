@@ -46,6 +46,7 @@
 		</div>
 		<div id="search_panel" class="panel" ng-controller="SearchResultCtrl" ng-show="showSearch">
 			<div class="search_text_wrapper"><input type="text" id="search" search class="search-query input-large" placeholder="Type Movie/Song name... "/></div>
+			<div ng-class="loadingClass"></div>
 			<div id="results" ng-show="showResults">
 				<ul>
 					<li ng-repeat="result in results">

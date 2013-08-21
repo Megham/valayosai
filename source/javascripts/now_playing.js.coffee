@@ -107,7 +107,7 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, sendMessage, Song) ->
 
 	}
 
-valayosai.directive 'search', ($http, $q, Result) ->
+valayosai.directive 'search', ($http, $q, Result, purr) ->
 	{
 		link: (scope, elm, attrs, ctrl) ->
 			elm.bind 'keyup', () ->
@@ -115,17 +115,23 @@ valayosai.directive 'search', ($http, $q, Result) ->
 				delay(() ->
 					s = []
 					if elm.val().length > 1
+						scope.loadingClass = "loading"
+						scope.$apply()
 						searchVal = elm.val()
 						searchURL = songScrapper + "/search?q="+ encodeURIComponent(searchVal)
 						$http.get(searchURL, {})
 						.success (data, status, headers, config) ->
 							$.each data, (index, result) ->
 								s.push new Result {type: result._type, name: result.name, movie: result.movie_name, id: result._id, url: result.url}
-
-					scope.$apply () ->
-						scope.results = s
+							scope.results = s
+							scope.showResults = true
+							scope.loadingClass = ""
+							purr("No results found") if s.length == 0
+					else
+						scope.results = []
 						scope.showResults = true
-
+						scope.loadingClass = ""
+						scope.$apply()
 				, 250)
 	}
 
@@ -150,6 +156,8 @@ SearchResultCtrl = ($scope, $rootScope, $http, Result, NowPlaying, purr) ->
 
 	$scope.showAlbum = (result) ->
 		getAllSongsUrl = "#{songScrapper}/#{result.type}s/#{result.id}"
+		$scope.album = {}
+		$scope.loadingClass = "loading"
 		$scope.showResults = false
 		$http.get(getAllSongsUrl, {})
 			.success (data, status, headers, config) ->
@@ -157,6 +165,8 @@ SearchResultCtrl = ($scope, $rootScope, $http, Result, NowPlaying, purr) ->
 				$.each data, (key, value) ->
 					songs.push {name: value.name, id: value._id, url: value.url, checked: false}
 				$scope.album = {name: result.name, songs: songs}
+				$scope.loadingClass = ""
+
 
 	$scope.addAllAlbumSongs = () ->
 		$.each $scope.album.songs, (index, value) ->
