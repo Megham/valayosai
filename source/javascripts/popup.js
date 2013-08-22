@@ -183,19 +183,19 @@ volumeIcon.click(function(e){
 
 function setVolumeState(volumeVal)
 {
-	volumeVal = parseInt(volumeVal);
-	sendMessage({action: "volume", value: parseFloat(volumeVal / 10) })
-	volume.val(volumeVal);
-	volState = volumeVal != 0 ? "ON" : "OFF";
-	localStorage["volume"] = volState;
-	if(volState == "ON")
-	{
-		$("i", volumeIcon).attr("class", "icon-volume-up");
-		localStorage["lastVolumeVal"] = volumeVal;
-	}
-	else{
-		$("i", volumeIcon).attr("class", "icon-volume-off");
-	}
+	// volumeVal = parseInt(volumeVal);
+	// sendMessage({action: "volume", value: parseFloat(volumeVal / 10) })
+	// volume.val(volumeVal);
+	// volState = volumeVal != 0 ? "ON" : "OFF";
+	// localStorage["volume"] = volState;
+	// if(volState == "ON")
+	// {
+	// 	$("i", volumeIcon).attr("class", "icon-volume-up");
+	// 	localStorage["lastVolumeVal"] = volumeVal;
+	// }
+	// else{
+	// 	$("i", volumeIcon).attr("class", "icon-volume-off");
+	// }
 }
 
 createPlaylist.click(function(e){
@@ -368,14 +368,14 @@ function removeFromLocalStorage(index){
 }
 function addToNowPlaying(songJson, playImmediately)
 {
-	playImmediately = typeof playImmediately !== 'undefined' ? playImmediately : true;
-	var dataID = songJson.id != undefined ? "data-id='" + songJson.id+"'" : '';
-	nowPlaying.append("<li><span><a class='playsong' data-song='"+songJson.song+"' "+ dataID+ " data-movie='"+songJson.movie+"' href >"+ songJson.song +"-" + songJson.movie +"</a></span><a class='remove_song' href='' "+dataID+"><i class='icon-remove-sign'></i></a></li>");
-	if(playImmediately)
-	{
-		sendMessage({action: "playSongIfNotPlaying", id: songJson.id});
-		_gaq.push(['_trackEvent', 'AddSong', 'Added', songJson.song + " - " + songJson.movie]);
-	}
+	// playImmediately = typeof playImmediately !== 'undefined' ? playImmediately : true;
+	// var dataID = songJson.id != undefined ? "data-id='" + songJson.id+"'" : '';
+	// nowPlaying.append("<li><span><a class='playsong' data-song='"+songJson.song+"' "+ dataID+ " data-movie='"+songJson.movie+"' href >"+ songJson.song +"-" + songJson.movie +"</a></span><a class='remove_song' href='' "+dataID+"><i class='icon-remove-sign'></i></a></li>");
+	// if(playImmediately)
+	// {
+	// 	sendMessage({action: "playSongIfNotPlaying", id: songJson.id});
+	// 	_gaq.push(['_trackEvent', 'AddSong', 'Added', songJson.song + " - " + songJson.movie]);
+	// }
 }
 
 function setPlayPause(action){

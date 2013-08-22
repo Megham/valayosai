@@ -17,6 +17,11 @@ $ () ->
 		s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 	)()
 
+	$('.thanks a').click (e) ->
+			url = $(this).attr("href")
+			chrome.tabs.create({url: url})
+			e.preventDefault()
+
 delay = (() ->
 	timer = 0
 	(callback, ms) ->
