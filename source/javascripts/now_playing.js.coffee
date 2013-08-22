@@ -2,6 +2,8 @@ songScrapper = "http://valayosai.com";
 valayosai = angular.module('valayosai', [])
 playerLength = 250
 
+
+
 $ () ->
 	chrome.extension.sendMessage {message: {action: "init"}}
 	$("#fb_like_iframe")[0].src = "http://www.facebook.com/plugins/like.php?href=https://www.facebook.com/valayosai1&send=false&layout=button_count&width=90&show_faces=false&font&colorscheme=light&action=like&height=21&appId=247333488655259&"
@@ -97,7 +99,7 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, sendMessage, Song) ->
 				$rootScope.npSongs = []
 
 			,destroy: (id) ->
-				sendMessage({action: "destroy", id: id})
+				# sendMessage({action: "destroy", id: id})
 				$rootScope.npSongs = $.grep $rootScope.npSongs, (obj)->
 							obj.id != id
 
@@ -236,7 +238,7 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 			$scope.loopActiveClass = if command.loopValue? then "active" else ""
 			$scope.shuffleActiveClass = command.shuffleValue
 			setVolumeState(command.volume, $scope)
-			$scope.loadSongClass = "audio_loading" if !command.paused && command.readyState == 0
+			$scope.loadSongClass = "audio_loading" if !command.paused && command.readyState == 0 && (command.songSrc? && command.songSrc!= "")
 
 
 		if(command.action == "timeupdate")

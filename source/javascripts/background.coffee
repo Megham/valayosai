@@ -6,6 +6,7 @@ $("head").append("<script></script>")
 window._gaq = window._gaq || []
 window._gaq.push(['_setAccount', 'UA-41329375-1'])
 window._gaq.push(['_trackPageview'])
+chrome.browserAction.setBadgeBackgroundColor({"color": "#000"})
 
 (() ->
 	ga = document.createElement('script')
@@ -160,9 +161,9 @@ Playlist =
 		playing
 
 	resetPlayer: () ->
-		audio.pause()
 		audioSrc.src = ""
 		audio.load()
+		audio.pause()
 		$(audio).data "id", null
 		sendMessage({action: "emptyPlayer"})	
 
@@ -205,7 +206,7 @@ chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 		response = playing: isPlaying
 		playPercent = audio.currentTime / audio.duration
 		$.extend response,
-		song: audio.src
+		songSrc: audioSrc.src
 		duration: getFormattedTime(audio.duration)
 		currentTime: getFormattedTime(audio.currentTime)
 		playPercent: playPercent
@@ -259,8 +260,16 @@ audio.addEventListener "loadstart", (() -> 	sendAudioBuffering()), false
 audio.addEventListener "progress", (() -> sendAudioBuffering()), false
 audio.addEventListener "ended", () -> 	
 		Playlist.playNext()
+		chrome.browserAction.setBadgeText({"text":""})
 	, false
 audio.addEventListener('error', (e) -> 
 						songId = $(audio).data("id")
 						Playlist.destroy(songId) if Playlist.find(songId)?
+						chrome.browserAction.setBadgeText({"text":""})	
+					, true)
+audio.addEventListener('pause', (e) -> 
+						chrome.browserAction.setBadgeText({"text":""})	
+					, true)
+audio.addEventListener('play', (e) -> 
+						chrome.browserAction.setBadgeText({"text":">"})	if audioSrc.src != null and audioSrc.src != ""
 					, true)
