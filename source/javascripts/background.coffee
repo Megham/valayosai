@@ -30,6 +30,7 @@ LocalStorage =
 		existingPlaylist = $.grep existingPlaylist, (obj) ->
 							obj.id != id
 		this.persist existingPlaylist
+		sendMessage({action: "removeSong", id: id})
 
 	destroyAll: () ->
 		this.persist []
@@ -259,3 +260,7 @@ audio.addEventListener "progress", (() -> sendAudioBuffering()), false
 audio.addEventListener "ended", () -> 	
 		Playlist.playNext()
 	, false
+audio.addEventListener('error', (e) -> 
+						songId = $(audio).data("id")
+						Playlist.destroy(songId) if Playlist.find(songId)?
+					, true)

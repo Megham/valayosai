@@ -91,10 +91,10 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, sendMessage, Song) ->
 				sendMessage({action: "destroyAll"})
 				$rootScope.npSongs = []
 
-			,destroy: (record) ->
-				sendMessage({action: "destroy", id: record.id})
+			,destroy: (id) ->
+				sendMessage({action: "destroy", id: id})
 				$rootScope.npSongs = $.grep $rootScope.npSongs, (obj)->
-							obj != record
+							obj.id != id
 
 			,playSong: (id) ->
 				sendMessage({action: "aplaySong", id: id})
@@ -191,7 +191,7 @@ SearchResultCtrl = ($scope, $rootScope, $http, Result, NowPlaying, purr) ->
 
 NowPlayingCtrl = ($rootScope, $scope, sendMessage, NowPlaying) ->
 	$scope.removeSong = (song) ->
-		NowPlaying.destroy(song)
+		sendMessage({action: "destroy", id: song.id})
 
 	$scope.createPlaylist = () ->
 		$rootScope.createPlaylistPopup = if $rootScope.npSongs.length < 15 then "#need_more" else "#create_playlist"
@@ -202,13 +202,14 @@ NowPlayingCtrl = ($rootScope, $scope, sendMessage, NowPlaying) ->
 	$scope.playSong = (id) ->
 		NowPlaying.playSong(id)
 
-CreatePlaylistCtrl = ($rootScope, $scope, $http) ->
+CreatePlaylistCtrl = ($rootScope, $scope, $http, purr) ->
 	$scope.playlistName = ""
 	$scope.createPlaylist = () ->
 		$http.post(songScrapper+"/playlists", {name: $scope.playlistName, songIds: $rootScope.npSongs.map((obj) -> obj.id) })
 						.success (data, status, headers, config) ->
+							purr("#{$scope.playlistName} playlist created")
+							$scope.playlistName = ""
 							$("#create_playlist").modal("hide")
-
 
 VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr) ->
 	$scope.playPause = "pause"
@@ -286,6 +287,9 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 
 		if(command.action == "updateAllNew")
 			$.each $rootScope.npSongs, (i,v) -> v.state = "new"
+
+		if(command.action == "removeSong")
+			NowPlaying.destroy(command.id)
 
 		$scope.$apply()
 
