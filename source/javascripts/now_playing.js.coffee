@@ -131,6 +131,8 @@ valayosai.directive 'search', ($http, $q, Result, purr,$window) ->
 					s = []
 					if elm.val().length > 1
 						scope.loadingClass = "loading"
+						scope.showResults = false
+						scope.showAlbum = false
 						scope.$apply()
 						searchVal = elm.val()
 						$window._gaq.push(['_trackEvent', 'search', 'searched', searchVal]);
@@ -141,11 +143,13 @@ valayosai.directive 'search', ($http, $q, Result, purr,$window) ->
 								s.push new Result {type: result._type, name: result.name, movie: result.movie_name, id: result._id, url: result.url}
 							scope.results = s
 							scope.showResults = true
+							scope.showAlbum = true
 							scope.loadingClass = ""
 							purr("No results found") if s.length == 0
 					else
 						scope.results = []
 						scope.showResults = true
+						scope.showAlbum = true
 						scope.loadingClass = ""
 						scope.$apply()
 				, 250)
@@ -155,6 +159,7 @@ valayosai.directive 'search', ($http, $q, Result, purr,$window) ->
 SearchResultCtrl = ($scope, $rootScope, $http, Result, NowPlaying, purr) ->
 	$rootScope.showSearch = false
 	$scope.showResults = true
+	$scope.showAlbum = true
 	$scope.album = {name: "", songs: []}
 
 	$scope.addSong = (id) ->
@@ -170,7 +175,7 @@ SearchResultCtrl = ($scope, $rootScope, $http, Result, NowPlaying, purr) ->
 					NowPlaying.add({name: value.name, movie: value.movie_name, id: value._id, url: value.url})
 				purr()
 
-	$scope.showAlbum = (result) ->
+	$scope.displayAlbum = (result) ->
 		getAllSongsUrl = "#{songScrapper}/#{result.type}s/#{result.id}"
 		$scope.album = {}
 		$scope.loadingClass = "loading"

@@ -55,11 +55,11 @@
 
 						<a href ng-show="!result.isSong($event)" ng-click="addAllSongs(result)" class='addall' title='Add all songs in album'><i class='icon-plus-sign'></i></a>
 
-						<a href ng-show="!result.isSong($event)" ng-click="showAlbum(result)" class='viewentries' title='View album'><i class='icon-list'></i></a>
+						<a href ng-show="!result.isSong($event)" ng-click="displayAlbum(result)" class='viewentries' title='View album'><i class='icon-list'></i></a>
 					</li>
 				</ul>
 			</div>
-			<div id="album" ng-show="!showResults" >
+			<div id="album" ng-show="!showResults && showAlbum" >
 				<div class="back_container"><a href="" ng-click="showResults = true" id="album_back" title="Back to search result"><i class="icon-chevron-left icon-2"></i></a></div>
 				<div>
 					<div>
