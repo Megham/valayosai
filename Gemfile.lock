@@ -99,4 +99,5 @@ DEPENDENCIES
   middleman (~> 3.1.4)
   middleman-livereload (~> 3.1.0)
   ruby18_source_location
+  uglifier
   wdm (~> 0.1.0)
