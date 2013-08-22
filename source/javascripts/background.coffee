@@ -2,6 +2,18 @@ $("body").append "<audio id='main_player' controls><source id='player_src' type=
 audio = $("#main_player")[0]
 audioSrc = $("#player_src")[0]
 currentSongIndex = null
+$("head").append("<script></script>")
+window._gaq = window._gaq || []
+window._gaq.push(['_setAccount', 'UA-41329375-1'])
+window._gaq.push(['_trackPageview'])
+
+(() ->
+	ga = document.createElement('script')
+	ga.type = 'text/javascript'
+	ga.async = true
+	ga.src = 'https://ssl.google-analytics.com/ga.js'
+	s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+)()
 
 LocalStorage = 
 	add: (songJson) ->
@@ -78,6 +90,7 @@ Playlist =
 			audio.load()
 			$(audio).data "id", id
 			audio.play()
+			window._gaq.push(['_trackEvent', 'AddSong', 'Added', "#{toPlay.name} || #{toPlay.id}"]);
 			sendMessage	{action: "preparePlayerForNewSong", id: id}
 			if LocalStorage.get("loop")? && LocalStorage.get("loop") != id
 				this.toggleLoopPlaying()
@@ -197,6 +210,7 @@ chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 		playPercent: playPercent
 		bufferPercent: getBufferPercent()
 		paused: audio.paused
+		readyState: audio.readyState
 		id: $(audio).data("id")
 		volume: parseInt(audio.volume * 10)
 		allSongs: localStorage["playlist"]

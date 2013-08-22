@@ -1,6 +1,21 @@
-songScrapper = "http://song-scrapper.herokuapp.com";
+songScrapper = "http://valayosai.com";
 valayosai = angular.module('valayosai', [])
 playerLength = 250
+
+$ () ->
+	chrome.extension.sendMessage {message: {action: "init"}}
+	$("#fb_like_iframe")[0].src = "http://www.facebook.com/plugins/like.php?href=https://www.facebook.com/valayosai1&send=false&layout=button_count&width=90&show_faces=false&font&colorscheme=light&action=like&height=21&appId=247333488655259&"
+	window._gaq = window._gaq || []
+	window._gaq.push(['_setAccount', 'UA-41329375-1'])
+	window._gaq.push(['_trackPageview'])
+
+	(() ->
+		ga = document.createElement('script')
+		ga.type = 'text/javascript'
+		ga.async = true
+		ga.src = 'https://ssl.google-analytics.com/ga.js'
+		s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	)()
 
 delay = (() ->
 	timer = 0
@@ -64,13 +79,6 @@ valayosai.factory 'setVolumeState', (LocalStorage, sendMessage) ->
 		scope.volumeIcon = "icon-volume-#{volState}"
 
 valayosai.factory 'NowPlaying', ($rootScope, purr, sendMessage, Song) ->
-	# playImmediately = typeof playImmediately !== 'undefined' ? playImmediately : true;
-	# var dataID = songJson.id != undefined ? "data-id='" + songJson.id+"'" : '';
-	# nowPlaying.append("<li><span><a class='playsong' data-song='"+songJson.song+"' "+ dataID+ " data-movie='"+songJson.movie+"' href >"+ songJson.song +"-" + songJson.movie +"</a></span><a class='remove_song' href='' "+dataID+"><i class='icon-remove-sign'></i></a></li>");
-	# if(playImmediately)
-	# {
-	# 	_gaq.push(['_trackEvent', 'AddSong', 'Added', songJson.song + " - " + songJson.movie]);
-	# }
 	NowPlaying = {
 			add: (songJson, doPurr) ->
 				songHash = {name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url}
@@ -107,7 +115,7 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, sendMessage, Song) ->
 
 	}
 
-valayosai.directive 'search', ($http, $q, Result, purr) ->
+valayosai.directive 'search', ($http, $q, Result, purr,$window) ->
 	{
 		link: (scope, elm, attrs, ctrl) ->
 			elm.bind 'keyup', () ->
@@ -118,6 +126,7 @@ valayosai.directive 'search', ($http, $q, Result, purr) ->
 						scope.loadingClass = "loading"
 						scope.$apply()
 						searchVal = elm.val()
+						$window._gaq.push(['_trackEvent', 'search', 'searched', searchVal]);
 						searchURL = songScrapper + "/search?q="+ encodeURIComponent(searchVal)
 						$http.get(searchURL, {})
 						.success (data, status, headers, config) ->
@@ -208,7 +217,7 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 	chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 		command = request.message
 		if command.action == "initResponse"
-			NowPlaying.initialize(command.allSongs)
+			NowPlaying.initialize(command.allSongs || "[]")
 			$scope.playingWidth = {width: "#{command.playPercent * playerLength}px"}
 			$scope.bufferingWidth = {width: "#{command.bufferPercent * playerLength}px"}
 			$scope.currentTime = command.currentTime
@@ -221,6 +230,8 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 			$scope.loopActiveClass = if command.loopValue? then "active" else ""
 			$scope.shuffleActiveClass = command.shuffleValue
 			setVolumeState(command.volume, $scope)
+			$scope.loadSongClass = "audio_loading" if !command.paused && command.readyState == 0
+
 
 		if(command.action == "timeupdate")
 			$scope.playingWidth = {width: "#{command.percent * playerLength}px"}
@@ -319,6 +330,3 @@ window.SearchResultCtrl = SearchResultCtrl
 window.NowPlayingCtrl = NowPlayingCtrl
 window.CreatePlaylistCtrl = CreatePlaylistCtrl
 window.VPlayerCtrl = VPlayerCtrl
-$ () ->
-	chrome.extension.sendMessage {message: {action: "init"}}
-	$("#fb_like_iframe")[0].src = "http://www.facebook.com/plugins/like.php?href=https://www.facebook.com/valayosai1&send=false&layout=button_count&width=90&show_faces=false&font&colorscheme=light&action=like&height=21&appId=247333488655259&"
