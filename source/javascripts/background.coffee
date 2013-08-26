@@ -161,9 +161,9 @@ Playlist =
 		playing
 
 	resetPlayer: () ->
+		audio.pause()
 		audioSrc.src = ""
 		audio.load()
-		audio.pause()
 		$(audio).data "id", null
 		sendMessage({action: "emptyPlayer"})	
 
@@ -264,6 +264,7 @@ audio.addEventListener "ended", () ->
 	, false
 audio.addEventListener('error', (e) -> 
 						songId = $(audio).data("id")
+						console.log('error')
 						Playlist.destroy(songId) if Playlist.find(songId)?
 						chrome.browserAction.setBadgeText({"text":""})	
 					, true)
