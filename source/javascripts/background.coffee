@@ -1,3 +1,4 @@
+songScrapper = "http://localhost:3000"
 $("body").append "<audio id='main_player' controls><source id='player_src' type='audio/mpeg; codecs=\"mp3\"'></source></audio>"
 audio = $("#main_player")[0]
 audioSrc = $("#player_src")[0]
@@ -66,6 +67,15 @@ Playlist =
 		unless this.find(songJson.id)
 			LocalStorage.add songJson
 			this.playSong(songJson.id) unless this.playing()?
+
+	addAlbum: (type, id) ->
+		getAllSongsUrl = "#{songScrapper}/#{type}s/#{id}"
+		$.getJSON(getAllSongsUrl, {})
+			.done (data) =>
+				$.each data, (key, value) =>
+					this.add({name: value.name, movie: value.movie_name, id: value._id, url: value.url})
+				sendMessage({action: "albumAdded", allSongString: localStorage["playlist"] || "[]"})
+
 
 	destroyAll: () ->
 		LocalStorage.remove("loop")
@@ -191,6 +201,9 @@ chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 
 	if command.action is "destroy"
 		Playlist.destroy(command.id)
+
+	if command.action is "addAlbum"
+		Playlist.addAlbum(command.type, command.id)
 	
 	if command.action is "destroyAll"
 		Playlist.destroyAll()

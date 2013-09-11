@@ -2,8 +2,6 @@ songScrapper = "http://valayosai.com";
 valayosai = angular.module('valayosai', [])
 playerLength = 250
 
-
-
 $ () ->
 	chrome.extension.sendMessage {message: {action: "init"}}
 	$("#fb_like_iframe")[0].src = "http://www.facebook.com/plugins/like.php?href=https://www.facebook.com/valayosai1&send=false&layout=button_count&width=90&show_faces=false&font&colorscheme=light&action=like&height=21&appId=247333488655259&"
@@ -94,6 +92,9 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, sendMessage, Song) ->
 					purr() if doPurr
 					sendMessage({action: "add", name: songJson.name, movie: songJson.movie, id: songJson.id, url: songJson.url, state: "new"})
 
+			,addAlbum: (type, id) ->
+				sendMessage({action: "addAlbum", type: type, id: id})
+
 			,destroyAll: () ->
 				sendMessage({action: "destroyAll"})
 				$rootScope.npSongs = []
@@ -119,6 +120,7 @@ valayosai.factory 'NowPlaying', ($rootScope, purr, sendMessage, Song) ->
 				$rootScope.npSongs = []
 				$.each JSON.parse(allSongString), (i, v) ->
 					$rootScope.npSongs.push(new Song(v))
+
 
 	}
 
@@ -168,12 +170,13 @@ SearchResultCtrl = ($scope, $rootScope, $http, Result, NowPlaying, purr) ->
 		NowPlaying.add(result[0], true)
 
 	$scope.addAllSongs = (result) ->
-		getAllSongsUrl = "#{songScrapper}/#{result.type}s/#{result.id}"
-		$http.get(getAllSongsUrl, {})
-			.success (data, status, headers, config) ->
-				$.each data, (key, value) ->
-					NowPlaying.add({name: value.name, movie: value.movie_name, id: value._id, url: value.url})
-				purr()
+		NowPlaying.addAlbum(result.type, result.id)
+		# getAllSongsUrl = "#{songScrapper}/#{result.type}s/#{result.id}"
+		# $http.get(getAllSongsUrl, {})
+		# 	.success (data, status, headers, config) ->
+		# 		$.each data, (key, value) ->
+		# 			NowPlaying.add({name: value.name, movie: value.movie_name, id: value._id, url: value.url})
+		# 		purr()
 
 	$scope.displayAlbum = (result) ->
 		getAllSongsUrl = "#{songScrapper}/#{result.type}s/#{result.id}"
@@ -293,6 +296,12 @@ VPlayerCtrl = ($scope, $rootScope, NowPlaying, sendMessage, setVolumeState, purr
 				purr("Shuffle mode ON")
 			else
 				purr("Shuffle mode OFF")
+
+		if command.action is "albumAdded"
+			NowPlaying.initialize(command.allSongString)
+			purr()
+
+
 
 		if(command.action == "setPlayingNew")
 			$scope.setPlayPause(true)

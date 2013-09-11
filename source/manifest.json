@@ -17,8 +17,9 @@
    },
   "content_scripts": [
     {
-      "matches": ["http://localhost:3000", "http://valayosai.com"],
-      "js": ["javascripts/jquery-1.9.1.min.js", "javascripts/cs.js"]
+      "matches": ["http://localhost:3000/*", "http://valayosai.com/*"],
+      "js": ["javascripts/jquery-1.9.1.min.js", "javascripts/cs.js"],
+      "css": ["stylesheets/cs.css"]
     }
   ],
   
