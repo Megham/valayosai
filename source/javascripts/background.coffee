@@ -1,4 +1,4 @@
-songScrapper = "http://localhost:3000"
+songScrapper = "http://www.valayosai.com"
 $("body").append "<audio id='main_player' controls><source id='player_src' type='audio/mpeg; codecs=\"mp3\"'></source></audio>"
 audio = $("#main_player")[0]
 audioSrc = $("#player_src")[0]
