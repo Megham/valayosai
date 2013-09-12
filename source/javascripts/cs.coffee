@@ -10,7 +10,7 @@ $ ()->
 		e.preventDefault()
 
 	$(".valayosai_add_album").click (e) ->
-		chrome.runtime.sendMessage {message: $.extend({action: "addAlbum"}, $(this).data())} , (resposnse) ->
+		chrome.runtime.sendMessage {message: $.extend({action: "addAlbum"}, $(this).data())} , (response) ->
 
 		displayPurr()
 		e.stopPropagation()

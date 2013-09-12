@@ -1,4 +1,5 @@
-songScrapper = "http://www.valayosai.com"
+# songScrapper = "http://www.valayosai.com"
+songScrapper = "http://localhost:3000"
 $("body").append "<audio id='main_player' controls><source id='player_src' type='audio/mpeg; codecs=\"mp3\"'></source></audio>"
 audio = $("#main_player")[0]
 audioSrc = $("#player_src")[0]
@@ -73,9 +74,9 @@ Playlist =
 		$.getJSON(getAllSongsUrl, {})
 			.done (data) =>
 				$.each data, (key, value) =>
-					this.add({name: value.name, movie: value.movie_name, id: value._id, url: value.url})
+					LocalStorage.add({name: value.name, movie: value.movie_name, id: value._id, url: value.url}) unless this.find(value._id)
 				sendMessage({action: "albumAdded", allSongString: localStorage["playlist"] || "[]"})
-
+				this.playSong(data[0]._id) unless this.playing()?
 
 	destroyAll: () ->
 		LocalStorage.remove("loop")
