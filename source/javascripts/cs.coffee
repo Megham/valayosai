@@ -1,6 +1,7 @@
 $ ()->
 	localStorage["installed"] = "true"
 	$('.valayosai_install').hide()
+	$('.chrome_ext_install_message').hide()
 	$('.valayosai_add_song').show()
 	$('.valayosai_add_album').show()
 	$('.valayosai_add_marked').show()
