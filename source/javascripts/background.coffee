@@ -1,5 +1,5 @@
-# songScrapper = "http://www.valayosai.com"
-songScrapper = "http://localhost:3000"
+songScrapper = "http://www.valayosai.com"
+# songScrapper = "http://localhost:3000"
 $("body").append "<audio id='main_player' controls><source id='player_src' type='audio/mpeg; codecs=\"mp3\"'></source></audio>"
 audio = $("#main_player")[0]
 audioSrc = $("#player_src")[0]
@@ -70,7 +70,7 @@ Playlist =
 			this.playSong(songJson.id) unless this.playing()?
 
 	addAlbum: (type, id) ->
-		getAllSongsUrl = "#{songScrapper}/#{type}s/#{id}"
+		getAllSongsUrl = "#{songScrapper}/#{type}s/#{id}.json"
 		$.getJSON(getAllSongsUrl, {})
 			.done (data) =>
 				$.each data, (key, value) =>
