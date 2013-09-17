@@ -18,7 +18,7 @@ $ () ->
 		s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 	)()
 
-	$('.thanks a').click (e) ->
+	$('a.external_link').click (e) ->
 			url = $(this).attr("href")
 			chrome.tabs.create({url: url})
 			e.preventDefault()
