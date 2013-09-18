@@ -1,6 +1,6 @@
 {
   "name": "Valayosai",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "manifest_version": 2,
   "description": "Listen to any Tamil song the moment you think about it.",
   "background": {
@@ -17,12 +17,12 @@
    },
   "content_scripts": [
     {
-      "matches": ["http://localhost:3000/*", "http://www.valayosai.com/*"],
+      "matches": ["http://www.valayosai.com/*"],
       "js": ["javascripts/jquery-1.9.1.min.js", "javascripts/cs.js"],
       "css": ["stylesheets/cs.css"]
     }
   ],
   
- "permissions": ["http://www.valayosai.com/"],
+ "permissions": ["http://*.valayosai.com/"],
   "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com; object-src 'self'"
 }

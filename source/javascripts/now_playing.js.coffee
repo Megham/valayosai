@@ -1,4 +1,4 @@
-songScrapper = "http://valayosai.com";
+songScrapper = "http://www.valayosai.com";
 # songScrapper = "http://localhost:3000";
 valayosai = angular.module('valayosai', [])
 playerLength = 250
