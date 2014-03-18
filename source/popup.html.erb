@@ -2,8 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<title></title>
-		<%= javascript_include_tag "jquery-1.9.1.min.js", "angular.min.js", "now_playing.js",  "bootstrap.js"%>
-		<%= stylesheet_link_tag "bootstrap.css", "font-awesome.css", "popup.css"%>
+		<%= javascript_include_tag "jquery-1.9.1.min.js", "angular.min.js", "jquery-ui", "sortable", "now_playing.js",  "bootstrap.js" %>
+		<%= stylesheet_link_tag "bootstrap.css", "font-awesome.css", "popup.css" %>
 		
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	</head>
@@ -86,7 +86,7 @@
 					<a href="{{createPlaylistPopup}}" id="np_create_playlist" ng-click="createPlaylist()" role="button" class="btn btn-primary btn-small" data-toggle="modal">Create Playlist</a>
 					<a href id="np_clear_all" ng-click="destroyAll()" title="Trash all songs"><i class="icon-trash"></i></a>
 				</div>
-				<ul>
+				<ul ui-sortable ng-model="npSongs">
 					<li ng-repeat="song in npSongs">
 						<span>
 							<a class='playsong' ng-class="song.state" ng-click="playSong(song.id)" href>{{song.name}} - {{song.movie}}</a>

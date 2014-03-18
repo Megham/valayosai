@@ -60,8 +60,12 @@ LocalStorage =
 
 	set: (key, value) ->
 		localStorage[key] = value
+
 	remove: (key) ->
 		localStorage.removeItem(key)
+
+	updatePlaylist: (newPlaylist) ->
+		this.persist newPlaylist
 
 Playlist =
 	add: (songJson) ->
@@ -240,7 +244,8 @@ chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
 	if command.action is "shufflePlaylist"
 		Playlist.toggleShufflePlaylist()
 
-
+	if command.action is "updatePlayList"
+		LocalStorage.updatePlaylist(command.playlist)
 
 getFormattedTime = (time) ->
 	time = (if isNaN(time) then 0 else parseInt(time))

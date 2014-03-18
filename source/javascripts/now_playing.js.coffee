@@ -1,6 +1,6 @@
 songScrapper = "http://www.valayosai.com";
 # songScrapper = "http://localhost:3000";
-valayosai = angular.module('valayosai', [])
+valayosai = angular.module('valayosai', ['ui.sortable'])
 playerLength = 250
 
 $ () ->
@@ -217,6 +217,11 @@ NowPlayingCtrl = ($rootScope, $scope, sendMessage, NowPlaying) ->
 
 	$scope.playSong = (id) ->
 		NowPlaying.playSong(id)
+
+	$rootScope.$watch 'npSongs', (newVal, oldVal) ->
+			if oldVal and newVal and (oldVal.length == newVal.length)
+				sendMessage({action: "updatePlayList", playlist: newVal})
+		, true
 
 CreatePlaylistCtrl = ($rootScope, $scope, $http, purr) ->
 	$scope.playlistName = ""
